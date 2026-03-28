@@ -120,7 +120,7 @@ function BoardView({ board, piece, ghostPiece, flashingRows = [] }: BoardViewPro
 // NextPiecePreview
 // -------------------------------------------------------
 function NextPiecePreview({ piece }: { piece: Piece }) {
-  const previewSize = 24
+  const previewSize = 20
   const cols = piece.shape[0].length
   const rows = piece.shape.length
   return (
@@ -296,7 +296,7 @@ export default function SprintTetris({ onBack }: Props) {
         </div>
 
         {/* サイドパネル */}
-        <div className="flex flex-col gap-4 min-w-[148px]">
+        <div className="flex flex-col gap-4 min-w-[140px]">
           {/* タイマー */}
           <div className="bg-gray-900 rounded-lg p-3 border border-cyan-500 text-center">
             <div className="text-xs text-gray-400 mb-1">タイム</div>

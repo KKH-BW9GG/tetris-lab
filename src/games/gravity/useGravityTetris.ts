@@ -86,6 +86,7 @@ export interface GravityTetrisState {
   paused: boolean
   flashingRows: number[]
   levelUpFlash: boolean
+  waiting: boolean
 }
 
 export function useGravityTetris() {
@@ -97,11 +98,12 @@ export function useGravityTetris() {
       board: createEmptyBoard(), piece, nextPiece, score: 0, gameOver: false,
       gravity, flipCountdown: FLIP_INTERVAL_MS / 1000, lines: 0, level: 1,
       isFlipping: false, flipDirection: 'toUp', isTopScore: false, paused: false,
-      flashingRows: [], levelUpFlash: false,
+      flashingRows: [], levelUpFlash: false, waiting: true,
     }
   })
 
   const pausedRef = useRef(false)
+  const waitingRef = useRef(true)
 
   const [softDrop, setSoftDrop] = useState(false)
 
@@ -227,28 +229,28 @@ export function useGravityTetris() {
   // Effects
   // -------------------------------------------------------
   useEffect(() => {
-    if (state.gameOver || state.isFlipping || state.paused) return
+    if (state.gameOver || state.isFlipping || state.paused || state.waiting) return
     const id = setInterval(dropTick, softDrop ? SOFT_MS : dropInterval(state.level))
     return () => clearInterval(id)
-  }, [state.gameOver, state.isFlipping, state.paused, softDrop, state.level, dropTick])
+  }, [state.gameOver, state.isFlipping, state.paused, state.waiting, softDrop, state.level, dropTick])
 
   // カウントダウンが 0 になったら flip（単一インターバルで同期）
   useEffect(() => {
-    if (state.gameOver || state.paused) return
+    if (state.gameOver || state.paused || state.waiting) return
     const id = setInterval(() => {
       setState(prev => {
-        if (prev.gameOver || prev.isFlipping || prev.paused) return prev
+        if (prev.gameOver || prev.isFlipping || prev.paused || prev.waiting) return prev
         return { ...prev, flipCountdown: Math.max(0, prev.flipCountdown - 1) }
       })
     }, 1000)
     return () => clearInterval(id)
-  }, [state.gameOver, state.paused])
+  }, [state.gameOver, state.paused, state.waiting])
 
   useEffect(() => {
-    if (state.flipCountdown === 0 && !state.isFlipping && !state.gameOver && !state.paused) {
+    if (state.flipCountdown === 0 && !state.isFlipping && !state.gameOver && !state.paused && !state.waiting) {
       flipGravity()
     }
-  }, [state.flipCountdown, state.isFlipping, state.gameOver, state.paused, flipGravity])
+  }, [state.flipCountdown, state.isFlipping, state.gameOver, state.paused, state.waiting, flipGravity])
 
   // フラッシュを 180ms 後にクリア
   useEffect(() => {
@@ -270,6 +272,11 @@ export function useGravityTetris() {
           pausedRef.current = !pausedRef.current
           setState(prev => ({ ...prev, paused: !prev.paused }))
         }
+        return
+      }
+      if (waitingRef.current) {
+        waitingRef.current = false
+        setState(prev => ({ ...prev, waiting: false }))
         return
       }
       if (gameOverRef.current || isFlippingRef.current || pausedRef.current) return
@@ -344,6 +351,11 @@ export function useGravityTetris() {
     pausedRef.current = state.paused
   }, [state.paused])
 
+  // Keep waitingRef in sync
+  useEffect(() => {
+    waitingRef.current = state.waiting
+  }, [state.waiting])
+
   // -------------------------------------------------------
   // リスタート
   // -------------------------------------------------------
@@ -352,6 +364,7 @@ export function useGravityTetris() {
     gameOverRef.current = false
     isFlippingRef.current = false
     pausedRef.current = false
+    waitingRef.current = true
     setSoftDrop(false)
     const gravity: Gravity = 'down'
     setState({
@@ -370,6 +383,7 @@ export function useGravityTetris() {
       paused: false,
       flashingRows: [],
       levelUpFlash: false,
+      waiting: true,
     })
   }, [])
 

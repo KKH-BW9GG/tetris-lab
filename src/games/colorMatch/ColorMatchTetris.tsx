@@ -67,6 +67,7 @@ export default function ColorMatchTetris({ onBack }: Props) {
     isClearing,
     isTopScore,
     paused,
+    waiting,
     restart,
     moveLeft,
     moveRight,
@@ -150,6 +151,15 @@ export default function ColorMatchTetris({ onBack }: Props) {
             )}
           </div>
 
+          {/* READY オーバーレイ */}
+          {waiting && (
+            <div className="absolute inset-0 flex flex-col items-center justify-center gap-3"
+              style={{ background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(2px)' }}>
+              <span className="text-5xl font-black text-orange-300 animate-pulse tracking-widest">READY</span>
+              <span className="text-gray-400 text-sm">Press any key to start</span>
+            </div>
+          )}
+
           {/* ポーズオーバーレイ */}
           {paused && !gameOver && (
             <div
@@ -189,7 +199,7 @@ export default function ColorMatchTetris({ onBack }: Props) {
         </div>
 
         {/* サイドパネル */}
-        <div className="flex flex-col gap-4 min-w-[120px]">
+        <div className="flex flex-col gap-4 min-w-[140px]">
           {/* スコア */}
           <div className="bg-gray-900 border border-gray-700 rounded p-3">
             <p className="text-gray-400 text-xs uppercase tracking-wider mb-1">Score</p>
@@ -248,7 +258,7 @@ export default function ColorMatchTetris({ onBack }: Props) {
       )}
 
       {/* タッチコントロール */}
-      {!gameOver && !paused && (
+      {!gameOver && !paused && !waiting && (
         <TouchControls
           onLeft={moveLeft}
           onRight={moveRight}

@@ -69,7 +69,7 @@ function NextPiecePreview({ piece }: { piece: { shape: number[][], color: string
 export default function SlimeTetris({ onBack }: Props) {
   const { state, ghostPiece, restart, moveLeft, moveRight, rotate, hardDrop, softDropStart, softDropEnd, togglePause } = useSlimeTetris()
   useDAS(moveLeft, moveRight)
-  const { board, gameOver, score, lines, isCurrentSlime, isSlimeFalling, isTopScore, paused, flashingRows, nextPiece } = state
+  const { board, gameOver, score, lines, isCurrentSlime, isSlimeFalling, isTopScore, paused, flashingRows, nextPiece, waiting } = state
   const [showLeaderboard, setShowLeaderboard] = useState(false)
   const [scoreHighlight, setScoreHighlight] = useState(false)
   const prevScoreRef = useRef(score)
@@ -175,6 +175,15 @@ export default function SlimeTetris({ onBack }: Props) {
             />
           ))}
 
+          {/* READY overlay */}
+          {waiting && (
+            <div className="absolute inset-0 flex flex-col items-center justify-center gap-3"
+              style={{ background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(2px)' }}>
+              <span className="text-5xl font-black text-emerald-300 animate-pulse tracking-widest">READY</span>
+              <span className="text-gray-400 text-sm">Press any key to start</span>
+            </div>
+          )}
+
           {/* Pause overlay */}
           {paused && !gameOver && (
             <div
@@ -215,7 +224,7 @@ export default function SlimeTetris({ onBack }: Props) {
         </div>
 
         {/* Side panel */}
-        <div className="flex flex-col gap-4 min-w-[120px]">
+        <div className="flex flex-col gap-4 min-w-[140px]">
           {/* Score */}
           <div className="bg-gray-900 border border-gray-700 rounded-lg p-3">
             <p className="text-gray-400 text-xs uppercase tracking-wider mb-1">Score</p>
@@ -295,7 +304,7 @@ export default function SlimeTetris({ onBack }: Props) {
       )}
 
       {/* タッチコントロール */}
-      {!gameOver && !paused && (
+      {!gameOver && !paused && !waiting && (
         <TouchControls
           onLeft={moveLeft}
           onRight={moveRight}

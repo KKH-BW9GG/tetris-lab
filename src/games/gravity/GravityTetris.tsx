@@ -235,6 +235,15 @@ export default function GravityTetris({ onBack }: Props) {
             </div>
           </div>
 
+          {/* READY overlay */}
+          {state.waiting && (
+            <div className="absolute inset-0 flex flex-col items-center justify-center gap-3"
+              style={{ background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(2px)' }}>
+              <span className="text-5xl font-black text-indigo-300 animate-pulse tracking-widest">READY</span>
+              <span className="text-gray-400 text-sm">Press any key to start</span>
+            </div>
+          )}
+
           {/* PAUSE overlay */}
           {state.paused && !state.gameOver && (
             <div
@@ -327,7 +336,7 @@ export default function GravityTetris({ onBack }: Props) {
       </div>
 
       {/* タッチコントロール */}
-      {!state.gameOver && !state.paused && (
+      {!state.gameOver && !state.paused && !state.waiting && (
         <TouchControls
           onLeft={moveLeft}
           onRight={moveRight}

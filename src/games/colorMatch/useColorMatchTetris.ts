@@ -189,6 +189,7 @@ export interface ColorMatchState {
   isClearing: boolean
   isTopScore: boolean
   paused: boolean
+  waiting: boolean
 }
 
 const FALL_INTERVAL = 500
@@ -209,6 +210,7 @@ export function useColorMatchTetris() {
     isClearing: false,
     isTopScore: false,
     paused: false,
+    waiting: true,
   }))
 
   const [softDrop, setSoftDrop] = useState(false)
@@ -216,12 +218,14 @@ export function useColorMatchTetris() {
   const isClearingRef = useRef(false)
   const gameOverRef = useRef(false)
   const pausedRef = useRef(false)
+  const waitingRef = useRef(true)
 
   useEffect(() => {
     isClearingRef.current = state.isClearing
     gameOverRef.current = state.gameOver
     pausedRef.current = state.paused
-  }, [state.isClearing, state.gameOver, state.paused])
+    waitingRef.current = state.waiting
+  }, [state.isClearing, state.gameOver, state.paused, state.waiting])
 
   // ---------------------------------------------------------------
   // 連鎖消去処理
@@ -311,10 +315,10 @@ export function useColorMatchTetris() {
   // ---------------------------------------------------------------
 
   useEffect(() => {
-    if (state.gameOver || state.isClearing || state.paused) return
+    if (state.gameOver || state.isClearing || state.paused || state.waiting) return
     const interval = setInterval(() => {
       setState(prev => {
-        if (prev.gameOver || prev.isClearing || prev.paused || !prev.currentPiece) return prev
+        if (prev.gameOver || prev.isClearing || prev.paused || prev.waiting || !prev.currentPiece) return prev
         const moved: ColorPiece = { ...prev.currentPiece, y: prev.currentPiece.y + 1 }
         if (!isColliding(prev.board, asPiece(moved))) {
           return { ...prev, currentPiece: moved }
@@ -324,7 +328,7 @@ export function useColorMatchTetris() {
       })
     }, softDrop ? 50 : FALL_INTERVAL)
     return () => clearInterval(interval)
-  }, [state.gameOver, state.isClearing, state.paused, softDrop, lockPiece])
+  }, [state.gameOver, state.isClearing, state.paused, state.waiting, softDrop, lockPiece])
 
   // ---------------------------------------------------------------
   // キー操作
@@ -337,6 +341,11 @@ export function useColorMatchTetris() {
           pausedRef.current = !pausedRef.current
           setState(prev => ({ ...prev, paused: !prev.paused }))
         }
+        return
+      }
+      if (waitingRef.current) {
+        waitingRef.current = false
+        setState(prev => ({ ...prev, waiting: false }))
         return
       }
       if (gameOverRef.current || isClearingRef.current || pausedRef.current) return
@@ -393,6 +402,7 @@ export function useColorMatchTetris() {
     isClearingRef.current = false
     gameOverRef.current = false
     pausedRef.current = false
+    waitingRef.current = true
     setState({
       board: createEmptyBoard(),
       currentPiece: createColorPiece(),
@@ -404,6 +414,7 @@ export function useColorMatchTetris() {
       isClearing: false,
       isTopScore: false,
       paused: false,
+      waiting: true,
     })
   }, [])
 
@@ -528,6 +539,7 @@ export function useColorMatchTetris() {
     isClearing: state.isClearing,
     isTopScore: state.isTopScore,
     paused: state.paused,
+    waiting: state.waiting,
     restart,
     moveLeft,
     moveRight,

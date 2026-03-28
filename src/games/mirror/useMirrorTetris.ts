@@ -34,6 +34,7 @@ export interface MirrorTetrisState {
   paused: boolean
   flashingRows: number[]
   levelUpFlash: boolean
+  waiting: boolean
 }
 
 const SCORE_TABLE: Record<number, number> = { 1: 100, 2: 300, 3: 600, 4: 1000 }
@@ -130,6 +131,7 @@ function initState(): MirrorTetrisState {
     paused: false,
     flashingRows: [],
     levelUpFlash: false,
+    waiting: true,
   }
 }
 
@@ -138,6 +140,7 @@ export function useMirrorTetris() {
   const [softDrop, setSoftDrop] = useState(false)
   const gameOverRef = useRef(false)
   const pausedRef = useRef(false)
+  const waitingRef = useRef(true)
 
   // Clear flashingRows after animation completes
   useEffect(() => {
@@ -239,15 +242,20 @@ export function useMirrorTetris() {
     pausedRef.current = state.paused
   }, [state.paused])
 
+  // Keep waitingRef in sync
+  useEffect(() => {
+    waitingRef.current = state.waiting
+  }, [state.waiting])
+
   // -------------------------------------------------------
   // ドロップインターバル
   // -------------------------------------------------------
   useEffect(() => {
-    if (state.gameOver || state.paused) return
+    if (state.gameOver || state.paused || state.waiting) return
     const ms = softDrop ? 50 : dropIntervalMs(state.level)
     const id = setInterval(dropTick, ms)
     return () => clearInterval(id)
-  }, [state.gameOver, state.paused, state.level, softDrop, dropTick])
+  }, [state.gameOver, state.paused, state.waiting, state.level, softDrop, dropTick])
 
   // -------------------------------------------------------
   // キーボード操作
@@ -259,6 +267,11 @@ export function useMirrorTetris() {
           pausedRef.current = !pausedRef.current
           setState(prev => ({ ...prev, paused: !prev.paused }))
         }
+        return
+      }
+      if (waitingRef.current) {
+        waitingRef.current = false
+        setState(prev => ({ ...prev, waiting: false }))
         return
       }
       if (gameOverRef.current || pausedRef.current) return
@@ -380,6 +393,7 @@ export function useMirrorTetris() {
   const start = useCallback(() => {
     gameOverRef.current = false
     pausedRef.current = false
+    waitingRef.current = true
     setSoftDrop(false)
     setState(initState)
   }, [])
