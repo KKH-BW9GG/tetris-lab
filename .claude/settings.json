@@ -1,0 +1,17 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(curl -s http://localhost:3010)",
+      "Bash(sed -i '' 's/const \\\\[paused, setPaused\\\\] = useState\\(false\\)/const [paused] = useState\\(false\\)/' src/games/slimeBlock/useSlimeTetris.ts)",
+      "Bash(sed -i '' '/const pausedRef = useRef\\(false\\)/d' src/games/slimeBlock/useSlimeTetris.ts)",
+      "Bash(sed -i '' 's/\"\"version\"\": \"\"1.2.0\"\"/\"\"version\"\": \"\"1.3.0\"\"/' package.json)",
+      "Bash(grep '\"\"version\"\"' package.json)",
+      "Bash(sed -i '' 's/className=\"\"text-3xl font-bold text-red-400\"\">GAME OVER/className=\"\"text-3xl font-bold game-over-text\"\">GAME OVER/g' /Users/keiichi/Documents/AI_Working/game/tetris/src/games/mirror/MirrorTetris.tsx /Users/keiichi/Documents/AI_Working/game/tetris/src/games/colorMatch/ColorMatchTetris.tsx)",
+      "Bash(sed -i '' 's/className=\"\"text-red-400 text-2xl font-bold\"\">GAME OVER/className=\"\"text-2xl font-bold game-over-text\"\">GAME OVER/g' /Users/keiichi/Documents/AI_Working/game/tetris/src/games/slimeBlock/SlimeTetris.tsx)",
+      "Bash(python3 -c \":*)",
+      "Bash(sed -i '' \"s/''bg-gray-800 border border-gray-700''/''bg-gray-800 border-r border-b border-gray-700''/g\" /Users/keiichi/Documents/AI_Working/game/tetris/src/games/gravity/GravityTetris.tsx /Users/keiichi/Documents/AI_Working/game/tetris/src/games/sprint/SprintTetris.tsx /Users/keiichi/Documents/AI_Working/game/tetris/src/games/mirror/MirrorTetris.tsx)",
+      "Bash(__NEW_LINE_e308db552b601894__ sed:*)",
+      "Bash(gh auth:*)"
+    ]
+  }
+}
