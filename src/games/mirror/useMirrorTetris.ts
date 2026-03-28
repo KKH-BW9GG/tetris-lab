@@ -33,6 +33,7 @@ export interface MirrorTetrisState {
   isTopScore: boolean
   paused: boolean
   flashingRows: number[]
+  levelUpFlash: boolean
 }
 
 const SCORE_TABLE: Record<number, number> = { 1: 100, 2: 300, 3: 600, 4: 1000 }
@@ -128,6 +129,7 @@ function initState(): MirrorTetrisState {
     isTopScore: false,
     paused: false,
     flashingRows: [],
+    levelUpFlash: false,
   }
 }
 
@@ -143,6 +145,13 @@ export function useMirrorTetris() {
     const t = setTimeout(() => setState(prev => ({ ...prev, flashingRows: [] })), 180)
     return () => clearTimeout(t)
   }, [state.flashingRows])
+
+  // Clear levelUpFlash after animation completes
+  useEffect(() => {
+    if (!state.levelUpFlash) return
+    const t = setTimeout(() => setState(prev => ({ ...prev, levelUpFlash: false })), 300)
+    return () => clearTimeout(t)
+  }, [state.levelUpFlash])
 
   // -------------------------------------------------------
   // ピース固定 → ライン消去 → 次ピーム生成の共通処理
@@ -183,6 +192,7 @@ export function useMirrorTetris() {
         lines: newLines,
         level: newLevel,
         flashingRows: fullLines,
+        levelUpFlash: newLevel > prev.level ? true : prev.levelUpFlash,
       }
     }
 
@@ -200,6 +210,7 @@ export function useMirrorTetris() {
       gameOver: true,
       isTopScore: checkTopScore('mirror', newScore),
       flashingRows: fullLines,
+      levelUpFlash: newLevel > prev.level ? true : prev.levelUpFlash,
     }
   }
 

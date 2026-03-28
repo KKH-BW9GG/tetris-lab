@@ -211,7 +211,7 @@ export default function MirrorTetris({ onBack }: Props) {
   const prevScoreRef = useRef(state.score)
 
   useEffect(() => {
-    startBGM('default')
+    startBGM('mirror')
     return () => stopBGM()
   }, [])
 
@@ -354,6 +354,11 @@ export default function MirrorTetris({ onBack }: Props) {
           </div>
         </div>
       </div>
+
+      {/* レベルアップバースト */}
+      {state.levelUpFlash && (
+        <div className="level-up-burst" />
+      )}
 
       {/* タッチコントロール */}
       {!state.gameOver && !state.paused && (

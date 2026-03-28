@@ -178,6 +178,12 @@ export default function ColorMatchTetris({ onBack }: Props) {
               >
                 Restart
               </button>
+              <button
+                onClick={onBack}
+                className="px-6 py-2 bg-gray-700 hover:bg-gray-600 text-gray-300 text-sm font-medium rounded transition-colors"
+              >
+                Back to Menu
+              </button>
             </div>
           )}
         </div>
@@ -218,6 +224,7 @@ export default function ColorMatchTetris({ onBack }: Props) {
             <p>Space Rotate</p>
             <p>↓ Soft Drop</p>
             <p>↑ Hard Drop</p>
+            <p>P Pause</p>
           </div>
 
           {/* ルール説明 */}

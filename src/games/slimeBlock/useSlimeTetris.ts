@@ -29,6 +29,7 @@ interface SlimePiece extends Piece {
 export interface SlimeTetrisState {
   board: Board
   currentPiece: SlimePiece | null
+  nextPiece: SlimePiece
   score: number
   lines: number
   gameOver: boolean
@@ -90,6 +91,9 @@ function stepSlimeFall(board: Board): { next: Board; moved: boolean } {
 export function useSlimeTetris() {
   const [board, setBoard] = useState<Board>(createEmptyBoard)
   const [currentPiece, setCurrentPiece] = useState<SlimePiece | null>(null)
+  const [nextPieceState, setNextPieceState] = useState<SlimePiece>(spawnPiece)
+  const nextPieceRef = useRef<SlimePiece>(nextPieceState)
+  nextPieceRef.current = nextPieceState
   const [score, setScore] = useState(0)
   const [lines, setLines] = useState(0)
   const [gameOver, setGameOver] = useState(false)
@@ -122,7 +126,10 @@ export function useSlimeTetris() {
   // ---- helpers ----
 
   const spawnNext = useCallback((currentBoard: Board) => {
-    const piece = spawnPiece()
+    const piece = nextPieceRef.current
+    const newNext = spawnPiece()
+    setNextPieceState(newNext)
+    nextPieceRef.current = newNext
     if (isColliding(currentBoard, piece)) {
       soundGameOver()
       setGameOver(true)
@@ -281,6 +288,9 @@ export function useSlimeTetris() {
     isSlimeFallingRef.current = false
     setIsTopScoreState(false)
     setCurrentPiece(null)
+    const freshNext = spawnPiece()
+    setNextPieceState(freshNext)
+    nextPieceRef.current = freshNext
     setPaused(false)
     pausedRef.current = false
     setFlashingRows([])
@@ -315,6 +325,7 @@ export function useSlimeTetris() {
   const state: SlimeTetrisState = {
     board: displayBoard,
     currentPiece,
+    nextPiece: nextPieceState,
     score,
     lines,
     gameOver,

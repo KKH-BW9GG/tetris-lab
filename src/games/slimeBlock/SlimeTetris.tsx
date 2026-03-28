@@ -41,10 +41,35 @@ function getCellStyle(cell: Cell): CSSProperties {
   return { backgroundColor: cell.color }
 }
 
+function NextPiecePreview({ piece }: { piece: { shape: number[][], color: string } }) {
+  const previewSize = 20
+  const cols = piece.shape[0].length
+  const rows = piece.shape.length
+  return (
+    <div style={{
+      display: 'grid',
+      gridTemplateColumns: `repeat(${cols}, ${previewSize}px)`,
+      gridTemplateRows: `repeat(${rows}, ${previewSize}px)`,
+    }}>
+      {piece.shape.map((row, r) =>
+        row.map((cell, c) => (
+          <div key={`next-${r}-${c}`} style={{
+            width: previewSize,
+            height: previewSize,
+            backgroundColor: cell ? piece.color : 'transparent',
+            border: cell ? '1px solid rgba(0,0,0,0.3)' : 'none',
+            boxSizing: 'border-box',
+          }} />
+        ))
+      )}
+    </div>
+  )
+}
+
 export default function SlimeTetris({ onBack }: Props) {
   const { state, ghostPiece, restart, moveLeft, moveRight, rotate, hardDrop, softDropStart, softDropEnd, togglePause } = useSlimeTetris()
   useDAS(moveLeft, moveRight)
-  const { board, gameOver, score, lines, isCurrentSlime, isSlimeFalling, isTopScore, paused, flashingRows } = state
+  const { board, gameOver, score, lines, isCurrentSlime, isSlimeFalling, isTopScore, paused, flashingRows, nextPiece } = state
   const [showLeaderboard, setShowLeaderboard] = useState(false)
   const [scoreHighlight, setScoreHighlight] = useState(false)
   const prevScoreRef = useRef(score)
@@ -59,7 +84,7 @@ export default function SlimeTetris({ onBack }: Props) {
   }, [score])
 
   useEffect(() => {
-    startBGM('default')
+    startBGM('slime')
     return () => stopBGM()
   }, [])
 
@@ -179,6 +204,12 @@ export default function SlimeTetris({ onBack }: Props) {
               >
                 Restart
               </button>
+              <button
+                onClick={onBack}
+                className="px-6 py-2 bg-gray-700 hover:bg-gray-600 rounded-lg text-sm text-gray-300 transition-colors w-full"
+              >
+                Back to Menu
+              </button>
             </div>
           )}
         </div>
@@ -200,6 +231,14 @@ export default function SlimeTetris({ onBack }: Props) {
           <div className="bg-gray-900 border border-gray-700 rounded-lg p-3">
             <p className="text-gray-400 text-xs uppercase tracking-wider mb-1">Lines</p>
             <p className="text-green-400 text-xl font-bold tabular-nums">{lines}</p>
+          </div>
+
+          {/* Next piece preview */}
+          <div className="bg-gray-900 border border-gray-700 rounded p-3">
+            <p className="text-gray-400 text-xs uppercase tracking-wider mb-2">Next</p>
+            <div className="flex items-center justify-center min-h-[60px]">
+              <NextPiecePreview piece={nextPiece} />
+            </div>
           </div>
 
           {/* Current piece kind badge */}
