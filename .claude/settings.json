@@ -11,7 +11,16 @@
       "Bash(python3 -c \":*)",
       "Bash(sed -i '' \"s/''bg-gray-800 border border-gray-700''/''bg-gray-800 border-r border-b border-gray-700''/g\" /Users/keiichi/Documents/AI_Working/game/tetris/src/games/gravity/GravityTetris.tsx /Users/keiichi/Documents/AI_Working/game/tetris/src/games/sprint/SprintTetris.tsx /Users/keiichi/Documents/AI_Working/game/tetris/src/games/mirror/MirrorTetris.tsx)",
       "Bash(__NEW_LINE_e308db552b601894__ sed:*)",
-      "Bash(gh auth:*)"
+      "Bash(gh auth:*)",
+      "Bash(git -c:*)",
+      "Bash(vercel --prod --yes)",
+      "Bash(vercel link:*)",
+      "Bash(vercel --prod --yes --scope kkh-bw9ggs-projects)",
+      "Read(//Users/keiichi/.claude/commands/**)"
+    ],
+    "additionalDirectories": [
+      "/Users/keiichi/.claude/projects/-Users-keiichi-Documents-AI-Working-game-tetris/memory",
+      "/Users/keiichi/.claude/commands"
     ]
   }
 }

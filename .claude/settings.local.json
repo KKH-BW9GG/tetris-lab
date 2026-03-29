@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(//Users/keiichi/.claude/hooks/**)"
+    ],
+    "additionalDirectories": [
+      "/Users/keiichi/.claude/hooks"
+    ]
+  }
+}
