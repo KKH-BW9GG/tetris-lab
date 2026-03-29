@@ -92,7 +92,7 @@ function HoldPiecePreview({ piece }: { piece: { shape: number[][], color: string
 }
 
 export default function SlimeTetris({ onBack }: Props) {
-  const { state, ghostPiece, restart, moveLeft, moveRight, rotate, hardDrop, softDropStart, softDropEnd, togglePause } = useSlimeTetris()
+  const { state, ghostPiece, restart, moveLeft, moveRight, rotate, hardDrop, softDropStart, softDropEnd, togglePause, hold } = useSlimeTetris()
   useDAS(moveLeft, moveRight)
   const { board, gameOver, score, lines, isCurrentSlime, isSlimeFalling, isTopScore, paused, flashingRows, nextPiece, waiting, heldPiece, canHold } = state
   const [showLeaderboard, setShowLeaderboard] = useState(false)

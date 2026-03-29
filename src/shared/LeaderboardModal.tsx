@@ -23,11 +23,15 @@ export default function LeaderboardModal({ gameId, score, isTime = false, onClos
 
   const handleSubmit = () => {
     const trimmed = name.trim().slice(0, 8) || 'AAA'
-    const saved = isTime
+    const promise = isTime
       ? saveTime(gameId, trimmed, score)
       : saveScore(gameId, trimmed, score)
-    setEntries(saved)
-    setSubmitted(true)
+    promise.then((saved) => {
+      setEntries(saved)
+      setSubmitted(true)
+    }).catch(() => {
+      setSubmitted(true)
+    })
   }
 
   const displayScore = isTime ? formatTime(score) : score.toLocaleString()

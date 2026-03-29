@@ -7,6 +7,30 @@ export interface ScoreEntry {
   name: string
   score: number
   date: string  // ISO date string
+  sig?: string  // HMAC-SHA256 署名（改ざん検出用）
+}
+
+// ---- 署名ユーティリティ ----
+
+const SIGN_SECRET = 'stacklab-v1'
+
+async function signEntry(entry: ScoreEntry): Promise<string> {
+  const data = `${entry.name}:${entry.score}:${entry.date}`
+  const encoder = new TextEncoder()
+  const keyData = encoder.encode(SIGN_SECRET)
+  const msgData = encoder.encode(data)
+  const key = await crypto.subtle.importKey(
+    'raw', keyData, { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']
+  )
+  const sig = await crypto.subtle.sign('HMAC', key, msgData)
+  return Array.from(new Uint8Array(sig)).map(b => b.toString(16).padStart(2, '0')).join('')
+}
+
+export async function verifyEntry(entry: ScoreEntry): Promise<boolean> {
+  // sig なし（古いデータ等）は通過させる
+  if (!entry.sig) return true
+  const expected = await signEntry(entry)
+  return expected === entry.sig
 }
 
 const TOP_N = 5
@@ -38,9 +62,10 @@ export function isTopScore(gameId: string, score: number): boolean {
 }
 
 /** スコアを追加して保存。追加後のランキングを返す */
-export function saveScore(gameId: string, name: string, score: number): ScoreEntry[] {
+export async function saveScore(gameId: string, name: string, score: number): Promise<ScoreEntry[]> {
   const scores = getWeeklyScores(gameId)
   const entry: ScoreEntry = { name, score, date: new Date().toISOString() }
+  entry.sig = await signEntry(entry)
   const updated = [...scores, entry]
     .sort((a, b) => b.score - a.score)
     .slice(0, TOP_N)
@@ -59,9 +84,10 @@ export function isTopTime(gameId: string, timeMs: number): boolean {
   return timeMs < scores[scores.length - 1].score  // score フィールドに timeMs を入れる
 }
 
-export function saveTime(gameId: string, name: string, timeMs: number): ScoreEntry[] {
+export async function saveTime(gameId: string, name: string, timeMs: number): Promise<ScoreEntry[]> {
   const scores = getWeeklyScores(gameId)
   const entry: ScoreEntry = { name, score: timeMs, date: new Date().toISOString() }
+  entry.sig = await signEntry(entry)
   const updated = [...scores, entry]
     .sort((a, b) => a.score - b.score)  // 昇順（タイムは小さいほど良い）
     .slice(0, TOP_N)

@@ -136,6 +136,18 @@ export default function App() {
           </button>
         ))}
       </div>
+
+      {/* フッター */}
+      <div className="mt-8 text-center">
+        <a
+          href="/privacy.html"
+          className="text-gray-600 hover:text-gray-400 text-xs transition-colors"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          プライバシーポリシー
+        </a>
+      </div>
     </div>
   )
 }

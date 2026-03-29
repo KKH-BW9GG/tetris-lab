@@ -119,6 +119,7 @@ export default function ColorMatchTetris({ onBack }: Props) {
     softDropStart,
     softDropEnd,
     togglePause,
+    hold,
   } = useColorMatchTetris()
   useDAS(moveLeft, moveRight)
 
