@@ -205,9 +205,9 @@ export default function SlimeTetris({ onBack }: Props) {
           {/* READY overlay */}
           {waiting && (
             <div className="absolute inset-0 flex flex-col items-center justify-center gap-3"
-              style={{ background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(2px)' }}>
+              style={{ background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(2px)' }} onPointerDown={() => window.dispatchEvent(new KeyboardEvent("keydown", { key: " " }))}>
               <span className="text-5xl font-black text-emerald-300 animate-pulse tracking-widest">READY</span>
-              <span className="text-gray-400 text-sm">Press any key to start</span>
+              <span className="text-gray-400 text-sm">Tap to start</span>
             </div>
           )}
 
@@ -251,12 +251,12 @@ export default function SlimeTetris({ onBack }: Props) {
         </div>
 
         {/* Side panel */}
-        <div className="flex flex-row flex-wrap gap-2 justify-center lg:flex-col lg:gap-4 lg:min-w-[140px]">
+        <div className="flex flex-row flex-wrap gap-1 justify-center lg:flex-col lg:gap-4 lg:min-w-[140px]">
           {/* Score */}
-          <div className="bg-gray-900 border border-gray-700 rounded-lg p-3 min-w-[100px]">
+          <div className="bg-gray-900 border border-gray-700 rounded-lg p-3 min-w-[70px]">
             <p className="text-gray-400 text-xs uppercase tracking-wider mb-1">Score</p>
             <p
-              className={`text-2xl font-bold tabular-nums transition-colors duration-150 ${scoreHighlight ? 'text-white' : 'text-yellow-400'}`}
+              className={`text-lg font-bold tabular-nums transition-colors duration-150 ${scoreHighlight ? 'text-white' : 'text-yellow-400'}`}
               style={scoreHighlight ? { textShadow: '0 0 12px rgba(255,255,255,0.9)' } : undefined}
             >
               {score.toLocaleString()}
@@ -264,13 +264,13 @@ export default function SlimeTetris({ onBack }: Props) {
           </div>
 
           {/* Lines */}
-          <div className="bg-gray-900 border border-gray-700 rounded-lg p-3 min-w-[100px]">
+          <div className="bg-gray-900 border border-gray-700 rounded-lg p-3 min-w-[70px]">
             <p className="text-gray-400 text-xs uppercase tracking-wider mb-1">Lines</p>
             <p className="text-green-400 text-xl font-bold tabular-nums">{lines}</p>
           </div>
 
           {/* Hold */}
-          <div className={`bg-gray-900 border rounded p-3 min-w-[100px] ${!canHold ? 'border-gray-800 opacity-50' : 'border-emerald-500'}`}>
+          <div className={`bg-gray-900 border rounded p-3 min-w-[70px] ${!canHold ? 'border-gray-800 opacity-50' : 'border-emerald-500'}`}>
             <p className="text-gray-400 text-xs uppercase tracking-wider mb-2">Hold</p>
             <div className="flex items-center justify-center min-h-[50px]">
               {heldPiece ? (
@@ -282,7 +282,7 @@ export default function SlimeTetris({ onBack }: Props) {
           </div>
 
           {/* Next piece preview */}
-          <div className="bg-gray-900 border border-gray-700 rounded p-3 min-w-[100px]">
+          <div className="bg-gray-900 border border-gray-700 rounded p-3 min-w-[70px]">
             <p className="text-gray-400 text-xs uppercase tracking-wider mb-2">Next</p>
             <div className="flex items-center justify-center min-h-[60px]">
               <NextPiecePreview piece={nextPiece} />
@@ -290,7 +290,7 @@ export default function SlimeTetris({ onBack }: Props) {
           </div>
 
           {/* Current piece kind badge */}
-          <div className="bg-gray-900 border border-gray-700 rounded-lg p-3 min-w-[100px]">
+          <div className="bg-gray-900 border border-gray-700 rounded-lg p-3 min-w-[70px]">
             <p className="text-gray-400 text-xs uppercase tracking-wider mb-2">Current</p>
             {isCurrentSlime ? (
               <span className="inline-block px-2 py-1 bg-emerald-700/60 text-emerald-300 text-xs font-bold rounded-full border border-emerald-500/50 animate-pulse">
@@ -305,7 +305,7 @@ export default function SlimeTetris({ onBack }: Props) {
 
           {/* Status */}
           {isSlimeFalling && (
-            <div className="bg-emerald-900/40 border border-emerald-600/50 rounded-lg p-3 min-w-[100px]">
+            <div className="bg-emerald-900/40 border border-emerald-600/50 rounded-lg p-3 min-w-[70px]">
               <p className="text-emerald-400 text-xs font-semibold animate-pulse">
                 Slime falling...
               </p>

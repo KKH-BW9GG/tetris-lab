@@ -296,9 +296,9 @@ export default function SprintTetris({ onBack }: Props) {
 
           {/* READY オーバーレイ（キー入力待ち） */}
           {state.waiting && (
-            <div className="absolute inset-0 bg-black/60 flex flex-col items-center justify-center gap-2 rounded">
+            <div className="absolute inset-0 bg-black/60 flex flex-col items-center justify-center gap-2 rounded" onPointerDown={() => window.dispatchEvent(new KeyboardEvent('keydown', { key: ' ' }))}>
               <div className="text-4xl font-black text-cyan-300 animate-pulse">READY</div>
-              <div className="text-sm text-gray-400">Press any key to start</div>
+              <div className="text-sm text-gray-400">Tap to start</div>
             </div>
           )}
 
@@ -332,11 +332,11 @@ export default function SprintTetris({ onBack }: Props) {
         </div>
 
         {/* サイドパネル */}
-        <div className="flex flex-row flex-wrap gap-2 justify-center lg:flex-col lg:gap-4 lg:min-w-[140px]">
+        <div className="flex flex-row flex-wrap gap-1 justify-center lg:flex-col lg:gap-4 lg:min-w-[140px]">
           {/* HOLD */}
-          <div className={`bg-gray-900 rounded-lg p-3 border text-center min-w-[100px] ${!state.canHold ? 'border-gray-800 opacity-50' : 'border-cyan-500'}`}>
+          <div className={`bg-gray-900 rounded-lg p-1.5 border text-center min-w-[70px] ${!state.canHold ? 'border-gray-800 opacity-50' : 'border-cyan-500'}`}>
             <div className="text-xs text-gray-400 mb-2">HOLD</div>
-            <div className="flex justify-center items-center min-h-[48px]">
+            <div className="flex justify-center items-center min-h-[36px]">
               {state.heldPiece ? (
                 <HoldPiecePreview piece={state.heldPiece} />
               ) : (
@@ -346,7 +346,7 @@ export default function SprintTetris({ onBack }: Props) {
           </div>
 
           {/* タイマー */}
-          <div className="bg-gray-900 rounded-lg p-3 border border-cyan-500 text-center min-w-[100px]">
+          <div className="bg-gray-900 rounded-lg p-1.5 border border-cyan-500 text-center min-w-[70px]">
             <div className="text-xs text-gray-400 mb-1">タイム</div>
             <div className="text-4xl font-black tabular-nums text-cyan-300 leading-tight">
               {formatElapsed(state.elapsedMs)}
@@ -354,7 +354,7 @@ export default function SprintTetris({ onBack }: Props) {
           </div>
 
           {/* ライン進捗 */}
-          <div className="bg-gray-900 rounded-lg p-3 border border-teal-600 text-center min-w-[100px]">
+          <div className="bg-gray-900 rounded-lg p-1.5 border border-teal-600 text-center min-w-[70px]">
             <div className="text-xs text-gray-400 mb-1">Lines</div>
             <div className="text-3xl font-black tabular-nums text-teal-300">
               {state.lines}
@@ -382,7 +382,7 @@ export default function SprintTetris({ onBack }: Props) {
           </div>
 
           {/* ネクストピース */}
-          <div className="bg-gray-900 rounded-lg p-3 border border-gray-700 text-center min-w-[100px]">
+          <div className="bg-gray-900 rounded-lg p-1.5 border border-gray-700 text-center min-w-[70px]">
             <div className="text-xs text-gray-400 mb-2">NEXT</div>
             <div className="flex justify-center">
               <NextPiecePreview piece={state.nextPiece} />
@@ -390,7 +390,7 @@ export default function SprintTetris({ onBack }: Props) {
           </div>
 
           {/* 操作説明 */}
-          <div className="bg-gray-900 rounded-lg p-3 border border-gray-700 text-xs text-gray-400 space-y-1 hidden lg:block min-w-[120px]">
+          <div className="bg-gray-900 rounded-lg p-1.5 border border-gray-700 text-xs text-gray-400 space-y-1 hidden lg:block min-w-[120px]">
             <div className="font-semibold text-gray-300 mb-1">操作</div>
             <div>← → 移動</div>
             <div>Space 回転</div>

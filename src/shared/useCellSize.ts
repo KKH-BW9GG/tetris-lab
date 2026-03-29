@@ -22,10 +22,14 @@ function calcCellSize(): number {
   // Horizontal: board needs BOARD_COLS cells + some padding (32px total)
   const maxByWidth = Math.floor((vw - 32) / BOARD_COLS)
 
-  // Vertical: header(52) + board + touch controls(160) + gaps/padding(60)
-  const reservedHeight = 52 + 160 + 60
+  // Vertical budget: header(48) + board + sidebar(compact ~100) + touch controls(140) + gaps(40)
+  // On small screens, sidebar wraps below board so we must account for it
+  const isMobile = vw < 768
+  const reservedHeight = isMobile
+    ? 48 + 100 + 140 + 40  // header + sidebar + touch + gaps
+    : 48 + 60              // header + padding only (sidebar is beside board)
   const maxByHeight = Math.floor((vh - reservedHeight) / BOARD_ROWS)
 
-  // Clamp between 14px (tiny phone) and 30px (desktop)
-  return Math.max(14, Math.min(30, maxByWidth, maxByHeight))
+  // Clamp between 12px (tiny phone) and 30px (desktop)
+  return Math.max(12, Math.min(30, maxByWidth, maxByHeight))
 }

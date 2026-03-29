@@ -271,9 +271,9 @@ export default function GravityTetris({ onBack }: Props) {
           {/* READY overlay */}
           {state.waiting && (
             <div className="absolute inset-0 flex flex-col items-center justify-center gap-3"
-              style={{ background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(2px)' }}>
+              style={{ background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(2px)' }} onPointerDown={() => window.dispatchEvent(new KeyboardEvent("keydown", { key: " " }))}>
               <span className="text-5xl font-black text-indigo-300 animate-pulse tracking-widest">READY</span>
-              <span className="text-gray-400 text-sm">Press any key to start</span>
+              <span className="text-gray-400 text-sm">Tap to start</span>
             </div>
           )}
 
@@ -299,11 +299,11 @@ export default function GravityTetris({ onBack }: Props) {
         </div>
 
         {/* サイドバー */}
-        <div className="flex flex-row flex-wrap gap-2 justify-center lg:flex-col lg:gap-4 lg:min-w-[140px]">
+        <div className="flex flex-row flex-wrap gap-1 justify-center lg:flex-col lg:gap-4 lg:min-w-[140px]">
           {/* HOLD */}
-          <div className={`bg-gray-900 rounded-lg p-3 border text-center min-w-[100px] ${!state.canHold ? 'border-gray-800 opacity-50' : 'border-indigo-500'}`}>
+          <div className={`bg-gray-900 rounded-lg p-1.5 border text-center min-w-[70px] ${!state.canHold ? 'border-gray-800 opacity-50' : 'border-indigo-500'}`}>
             <div className="text-xs text-gray-400 mb-2">HOLD</div>
-            <div className="flex justify-center items-center min-h-[48px]">
+            <div className="flex justify-center items-center min-h-[36px]">
               {state.heldPiece ? (
                 <HoldPiecePreview piece={state.heldPiece} />
               ) : (
@@ -312,7 +312,7 @@ export default function GravityTetris({ onBack }: Props) {
             </div>
           </div>
 
-          <div className="bg-gray-900 rounded-lg p-3 border border-indigo-500 text-center min-w-[100px]">
+          <div className="bg-gray-900 rounded-lg p-1.5 border border-indigo-500 text-center min-w-[70px]">
             <div className="text-xs text-gray-400 mb-1">重力方向</div>
             <div
               className={`text-base font-bold ${
@@ -323,10 +323,10 @@ export default function GravityTetris({ onBack }: Props) {
             </div>
           </div>
 
-          <div className="bg-gray-900 rounded-lg p-3 border border-gray-700 text-center min-w-[100px]">
+          <div className="bg-gray-900 rounded-lg p-1.5 border border-gray-700 text-center min-w-[70px]">
             <div className="text-xs text-gray-400 mb-1">反転まで</div>
             <div
-              className={`text-3xl font-bold tabular-nums ${
+              className={`text-xl font-bold tabular-nums ${
                 state.flipCountdown <= 3 ? 'text-red-400 animate-pulse' : 'text-white'
               }`}
             >
@@ -336,17 +336,17 @@ export default function GravityTetris({ onBack }: Props) {
           </div>
 
           {/* NEXT ピースプレビュー */}
-          <div className="bg-gray-900 rounded-lg p-3 border border-gray-700 text-center min-w-[100px]">
+          <div className="bg-gray-900 rounded-lg p-1.5 border border-gray-700 text-center min-w-[70px]">
             <div className="text-xs text-gray-400 mb-2">NEXT</div>
-            <div className="flex justify-center items-center min-h-[48px]">
+            <div className="flex justify-center items-center min-h-[36px]">
               <NextPiecePreview piece={state.nextPiece} />
             </div>
           </div>
 
-          <div className="bg-gray-900 rounded-lg p-3 border border-gray-700 text-center min-w-[100px]">
+          <div className="bg-gray-900 rounded-lg p-1.5 border border-gray-700 text-center min-w-[70px]">
             <div className="text-xs text-gray-400 mb-1">スコア</div>
             <div
-              className={`text-2xl font-bold tabular-nums transition-colors duration-150 ${
+              className={`text-lg font-bold tabular-nums transition-colors duration-150 ${
                 scoreHighlight ? 'text-white' : 'text-yellow-400'
               }`}
               style={scoreHighlight ? { textShadow: '0 0 12px rgba(255,255,255,0.9)' } : undefined}
@@ -355,21 +355,21 @@ export default function GravityTetris({ onBack }: Props) {
             </div>
           </div>
 
-          <div className="bg-gray-900 rounded-lg p-3 border border-gray-700 text-center min-w-[100px]">
+          <div className="bg-gray-900 rounded-lg p-1.5 border border-gray-700 text-center min-w-[70px]">
             <div className="text-xs text-gray-400 mb-1">ライン</div>
             <div className="text-xl font-bold tabular-nums text-green-400">
               {state.lines}
             </div>
           </div>
 
-          <div className="bg-gray-900 rounded-lg p-3 border border-gray-700 text-center min-w-[100px]">
+          <div className="bg-gray-900 rounded-lg p-1.5 border border-gray-700 text-center min-w-[70px]">
             <div className="text-xs text-gray-400 mb-1">レベル</div>
             <div className="text-xl font-bold tabular-nums text-pink-400">
               {state.level}
             </div>
           </div>
 
-          <div className="bg-gray-900 rounded-lg p-3 border border-gray-700 text-xs text-gray-400 space-y-1 hidden lg:block min-w-[120px]">
+          <div className="bg-gray-900 rounded-lg p-1.5 border border-gray-700 text-xs text-gray-400 space-y-1 hidden lg:block min-w-[120px]">
             <div className="font-semibold text-gray-300 mb-1">操作</div>
             <div>← → 移動</div>
             <div>Space 回転</div>
