@@ -249,9 +249,9 @@ export default function MirrorTetris({ onBack }: Props) {
         )}
       </div>
 
-      <div className="flex gap-8 items-start">
+      <div className="flex flex-wrap gap-4 justify-center items-start">
         {/* ボード */}
-        <div style={{ position: 'relative' }}>
+        <div style={{ position: 'relative', touchAction: 'none' }}>
         <BoardView
           board={state.board}
           piece={state.piece}
@@ -285,8 +285,8 @@ export default function MirrorTetris({ onBack }: Props) {
         </div>
 
         {/* サイドバー */}
-        <div className="flex flex-col gap-4 min-w-[140px]">
-          <div className="bg-gray-900 rounded-lg p-3 border border-purple-500 text-center">
+        <div className="flex flex-row flex-wrap gap-2 justify-center lg:flex-col lg:gap-4 min-w-[280px] lg:min-w-[140px]">
+          <div className="bg-gray-900 rounded-lg p-3 border border-purple-500 text-center min-w-[100px]">
             <div className="text-xs text-gray-400 mb-1">スコア</div>
             <div
               className={`text-2xl font-bold tabular-nums transition-colors duration-150 ${
@@ -299,21 +299,21 @@ export default function MirrorTetris({ onBack }: Props) {
           </div>
 
           {/* NEXT ピースプレビュー */}
-          <div className="bg-gray-900 rounded-lg p-3 border border-gray-700 text-center">
+          <div className="bg-gray-900 rounded-lg p-3 border border-gray-700 text-center min-w-[100px]">
             <div className="text-xs text-gray-400 mb-2">NEXT</div>
             <div className="flex justify-center items-center min-h-[48px]">
               <NextPiecePreview piece={state.nextPiece} />
             </div>
           </div>
 
-          <div className="bg-gray-900 rounded-lg p-3 border border-gray-700 text-center">
+          <div className="bg-gray-900 rounded-lg p-3 border border-gray-700 text-center min-w-[100px]">
             <div className="text-xs text-gray-400 mb-1">ライン</div>
             <div className="text-xl font-bold tabular-nums text-green-400">
               {state.lines}
             </div>
           </div>
 
-          <div className="bg-gray-900 rounded-lg p-3 border border-gray-700 text-center">
+          <div className="bg-gray-900 rounded-lg p-3 border border-gray-700 text-center min-w-[100px]">
             <div className="text-xs text-gray-400 mb-1">レベル</div>
             <div className="text-xl font-bold tabular-nums text-purple-300">
               {state.level}
@@ -321,7 +321,7 @@ export default function MirrorTetris({ onBack }: Props) {
           </div>
 
           {/* 凡例 */}
-          <div className="bg-gray-900 rounded-lg p-3 border border-gray-700 text-xs space-y-2">
+          <div className="bg-gray-900 rounded-lg p-3 border border-gray-700 text-xs space-y-2 min-w-[100px]">
             <div className="font-semibold text-gray-300 mb-1">ピース</div>
             <div className="flex items-center gap-2">
               <div
@@ -352,7 +352,7 @@ export default function MirrorTetris({ onBack }: Props) {
           </div>
 
           {/* 操作説明 */}
-          <div className="bg-gray-900 rounded-lg p-3 border border-gray-700 text-xs text-gray-400 space-y-1">
+          <div className="bg-gray-900 rounded-lg p-3 border border-gray-700 text-xs text-gray-400 space-y-1 min-w-[180px]">
             <div className="font-semibold text-gray-300 mb-1">操作</div>
             <div>← → 移動</div>
             <div>Space 回転</div>

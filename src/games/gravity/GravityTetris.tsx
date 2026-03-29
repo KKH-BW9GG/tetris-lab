@@ -233,9 +233,9 @@ export default function GravityTetris({ onBack }: Props) {
         )}
       </div>
 
-      <div className="flex gap-8 items-start">
+      <div className="flex flex-wrap gap-4 justify-center items-start">
         {/* ボード + フリップアニメーション */}
-        <div style={{ overflow: 'hidden', position: 'relative' }}>
+        <div style={{ overflow: 'hidden', position: 'relative', touchAction: 'none' }}>
           <div
             style={{
               animation: state.isFlipping
@@ -296,9 +296,9 @@ export default function GravityTetris({ onBack }: Props) {
         </div>
 
         {/* サイドバー */}
-        <div className="flex flex-col gap-4 min-w-[140px]">
+        <div className="flex flex-row flex-wrap gap-2 justify-center lg:flex-col lg:gap-4 min-w-[280px] lg:min-w-[140px]">
           {/* HOLD */}
-          <div className={`bg-gray-900 rounded-lg p-3 border text-center ${!state.canHold ? 'border-gray-800 opacity-50' : 'border-indigo-500'}`}>
+          <div className={`bg-gray-900 rounded-lg p-3 border text-center min-w-[100px] ${!state.canHold ? 'border-gray-800 opacity-50' : 'border-indigo-500'}`}>
             <div className="text-xs text-gray-400 mb-2">HOLD</div>
             <div className="flex justify-center items-center min-h-[48px]">
               {state.heldPiece ? (
@@ -309,7 +309,7 @@ export default function GravityTetris({ onBack }: Props) {
             </div>
           </div>
 
-          <div className="bg-gray-900 rounded-lg p-3 border border-indigo-500 text-center">
+          <div className="bg-gray-900 rounded-lg p-3 border border-indigo-500 text-center min-w-[100px]">
             <div className="text-xs text-gray-400 mb-1">重力方向</div>
             <div
               className={`text-base font-bold ${
@@ -320,7 +320,7 @@ export default function GravityTetris({ onBack }: Props) {
             </div>
           </div>
 
-          <div className="bg-gray-900 rounded-lg p-3 border border-gray-700 text-center">
+          <div className="bg-gray-900 rounded-lg p-3 border border-gray-700 text-center min-w-[100px]">
             <div className="text-xs text-gray-400 mb-1">反転まで</div>
             <div
               className={`text-3xl font-bold tabular-nums ${
@@ -333,14 +333,14 @@ export default function GravityTetris({ onBack }: Props) {
           </div>
 
           {/* NEXT ピースプレビュー */}
-          <div className="bg-gray-900 rounded-lg p-3 border border-gray-700 text-center">
+          <div className="bg-gray-900 rounded-lg p-3 border border-gray-700 text-center min-w-[100px]">
             <div className="text-xs text-gray-400 mb-2">NEXT</div>
             <div className="flex justify-center items-center min-h-[48px]">
               <NextPiecePreview piece={state.nextPiece} />
             </div>
           </div>
 
-          <div className="bg-gray-900 rounded-lg p-3 border border-gray-700 text-center">
+          <div className="bg-gray-900 rounded-lg p-3 border border-gray-700 text-center min-w-[100px]">
             <div className="text-xs text-gray-400 mb-1">スコア</div>
             <div
               className={`text-2xl font-bold tabular-nums transition-colors duration-150 ${
@@ -352,21 +352,21 @@ export default function GravityTetris({ onBack }: Props) {
             </div>
           </div>
 
-          <div className="bg-gray-900 rounded-lg p-3 border border-gray-700 text-center">
+          <div className="bg-gray-900 rounded-lg p-3 border border-gray-700 text-center min-w-[100px]">
             <div className="text-xs text-gray-400 mb-1">ライン</div>
             <div className="text-xl font-bold tabular-nums text-green-400">
               {state.lines}
             </div>
           </div>
 
-          <div className="bg-gray-900 rounded-lg p-3 border border-gray-700 text-center">
+          <div className="bg-gray-900 rounded-lg p-3 border border-gray-700 text-center min-w-[100px]">
             <div className="text-xs text-gray-400 mb-1">レベル</div>
             <div className="text-xl font-bold tabular-nums text-pink-400">
               {state.level}
             </div>
           </div>
 
-          <div className="bg-gray-900 rounded-lg p-3 border border-gray-700 text-xs text-gray-400 space-y-1">
+          <div className="bg-gray-900 rounded-lg p-3 border border-gray-700 text-xs text-gray-400 space-y-1 min-w-[180px]">
             <div className="font-semibold text-gray-300 mb-1">操作</div>
             <div>← → 移動</div>
             <div>Space 回転</div>

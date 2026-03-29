@@ -170,13 +170,14 @@ export default function ColorMatchTetris({ onBack }: Props) {
         )}
       </div>
 
-      <div className="flex gap-6 items-start">
+      <div className="flex flex-wrap gap-4 justify-center items-start">
         {/* ボード */}
         <div
           className="border-2 border-orange-500 relative"
           style={{
             width: boardWidth,
             height: boardHeight,
+            touchAction: 'none',
           }}
         >
           {/* グリッド */}
@@ -242,9 +243,9 @@ export default function ColorMatchTetris({ onBack }: Props) {
         </div>
 
         {/* サイドパネル */}
-        <div className="flex flex-col gap-4 min-w-[140px]">
+        <div className="flex flex-row flex-wrap gap-2 justify-center lg:flex-col lg:gap-4 min-w-[280px] lg:min-w-[140px]">
           {/* HOLD */}
-          <div className={`bg-gray-900 border rounded p-3 ${!canHold ? 'border-gray-800 opacity-50' : 'border-orange-500'}`}>
+          <div className={`bg-gray-900 border rounded p-3 min-w-[100px] ${!canHold ? 'border-gray-800 opacity-50' : 'border-orange-500'}`}>
             <p className="text-gray-400 text-xs uppercase tracking-wider mb-2">Hold</p>
             <div className="flex items-center justify-center min-h-[50px]">
               {heldPiece ? (
@@ -256,7 +257,7 @@ export default function ColorMatchTetris({ onBack }: Props) {
           </div>
 
           {/* スコア */}
-          <div className="bg-gray-900 border border-gray-700 rounded p-3">
+          <div className="bg-gray-900 border border-gray-700 rounded p-3 min-w-[100px]">
             <p className="text-gray-400 text-xs uppercase tracking-wider mb-1">Score</p>
             <p
               className={`text-xl font-bold tabular-nums transition-colors duration-150 ${scoreHighlight ? 'text-white' : 'text-yellow-400'}`}
@@ -268,14 +269,14 @@ export default function ColorMatchTetris({ onBack }: Props) {
 
           {/* 連鎖 */}
           {chain > 0 && (
-            <div className="bg-orange-900/50 border border-orange-500 rounded p-3 animate-pulse">
+            <div className="bg-orange-900/50 border border-orange-500 rounded p-3 min-w-[100px] animate-pulse">
               <p className="text-orange-300 text-xs uppercase tracking-wider mb-1">Chain</p>
               <p className="text-orange-400 text-xl font-bold">x{chain}</p>
             </div>
           )}
 
           {/* ネクストピース */}
-          <div className="bg-gray-900 border border-gray-700 rounded p-3">
+          <div className="bg-gray-900 border border-gray-700 rounded p-3 min-w-[100px]">
             <p className="text-gray-400 text-xs uppercase tracking-wider mb-2">Next</p>
             <div className="flex items-center justify-center min-h-[60px]">
               <NextPiecePreview shape={nextPiece.shape} colors={nextPiece.colors} />
@@ -283,7 +284,7 @@ export default function ColorMatchTetris({ onBack }: Props) {
           </div>
 
           {/* 操作説明 */}
-          <div className="bg-gray-900 border border-gray-700 rounded p-3 text-xs text-gray-500 space-y-1">
+          <div className="bg-gray-900 border border-gray-700 rounded p-3 min-w-[180px] text-xs text-gray-500 space-y-1">
             <p className="text-gray-400 font-semibold mb-2">Controls</p>
             <p>← → Move</p>
             <p>Space Rotate</p>
@@ -294,7 +295,7 @@ export default function ColorMatchTetris({ onBack }: Props) {
           </div>
 
           {/* ルール説明 */}
-          <div className="bg-gray-900 border border-gray-700 rounded p-3 text-xs text-gray-500 space-y-1">
+          <div className="bg-gray-900 border border-gray-700 rounded p-3 min-w-[180px] text-xs text-gray-500 space-y-1">
             <p className="text-gray-400 font-semibold mb-2">Rules</p>
             <p>Line clear: row</p>
             <p>Color match:</p>

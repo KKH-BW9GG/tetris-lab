@@ -1,7 +1,11 @@
 {
   "permissions": {
     "allow": [
-      "Read(//Users/keiichi/.claude/hooks/**)"
+      "Read(//Users/keiichi/.claude/hooks/**)",
+      "Bash(for f:*)",
+      "Bash(do)",
+      "Bash(sed -i '' 's/          onHardDrop={hardDrop}$/          onHardDrop={hardDrop}\\\\n          onHold={hold}/' \"$f\")",
+      "Bash(done)"
     ],
     "additionalDirectories": [
       "/Users/keiichi/.claude/hooks"

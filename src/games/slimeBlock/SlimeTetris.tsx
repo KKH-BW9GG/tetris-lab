@@ -143,10 +143,10 @@ export default function SlimeTetris({ onBack }: Props) {
         )}
       </div>
 
-      <div className="flex gap-6 items-start">
+      <div className="flex flex-wrap gap-4 justify-center items-start">
         {/* Board */}
         <div className="relative border-2 border-emerald-500"
-          style={{ width: boardWidth, height: boardHeight }}
+          style={{ width: boardWidth, height: boardHeight, touchAction: 'none' }}
         >
           {/* Grid cells */}
           {board.map((row, r) =>
@@ -249,9 +249,9 @@ export default function SlimeTetris({ onBack }: Props) {
         </div>
 
         {/* Side panel */}
-        <div className="flex flex-col gap-4 min-w-[140px]">
+        <div className="flex flex-row flex-wrap gap-2 justify-center lg:flex-col lg:gap-4 min-w-[280px] lg:min-w-[140px]">
           {/* Score */}
-          <div className="bg-gray-900 border border-gray-700 rounded-lg p-3">
+          <div className="bg-gray-900 border border-gray-700 rounded-lg p-3 min-w-[100px]">
             <p className="text-gray-400 text-xs uppercase tracking-wider mb-1">Score</p>
             <p
               className={`text-2xl font-bold tabular-nums transition-colors duration-150 ${scoreHighlight ? 'text-white' : 'text-yellow-400'}`}
@@ -262,13 +262,13 @@ export default function SlimeTetris({ onBack }: Props) {
           </div>
 
           {/* Lines */}
-          <div className="bg-gray-900 border border-gray-700 rounded-lg p-3">
+          <div className="bg-gray-900 border border-gray-700 rounded-lg p-3 min-w-[100px]">
             <p className="text-gray-400 text-xs uppercase tracking-wider mb-1">Lines</p>
             <p className="text-green-400 text-xl font-bold tabular-nums">{lines}</p>
           </div>
 
           {/* Hold */}
-          <div className={`bg-gray-900 border rounded p-3 ${!canHold ? 'border-gray-800 opacity-50' : 'border-emerald-500'}`}>
+          <div className={`bg-gray-900 border rounded p-3 min-w-[100px] ${!canHold ? 'border-gray-800 opacity-50' : 'border-emerald-500'}`}>
             <p className="text-gray-400 text-xs uppercase tracking-wider mb-2">Hold</p>
             <div className="flex items-center justify-center min-h-[50px]">
               {heldPiece ? (
@@ -280,7 +280,7 @@ export default function SlimeTetris({ onBack }: Props) {
           </div>
 
           {/* Next piece preview */}
-          <div className="bg-gray-900 border border-gray-700 rounded p-3">
+          <div className="bg-gray-900 border border-gray-700 rounded p-3 min-w-[100px]">
             <p className="text-gray-400 text-xs uppercase tracking-wider mb-2">Next</p>
             <div className="flex items-center justify-center min-h-[60px]">
               <NextPiecePreview piece={nextPiece} />
@@ -288,7 +288,7 @@ export default function SlimeTetris({ onBack }: Props) {
           </div>
 
           {/* Current piece kind badge */}
-          <div className="bg-gray-900 border border-gray-700 rounded-lg p-3">
+          <div className="bg-gray-900 border border-gray-700 rounded-lg p-3 min-w-[100px]">
             <p className="text-gray-400 text-xs uppercase tracking-wider mb-2">Current</p>
             {isCurrentSlime ? (
               <span className="inline-block px-2 py-1 bg-emerald-700/60 text-emerald-300 text-xs font-bold rounded-full border border-emerald-500/50 animate-pulse">
@@ -303,7 +303,7 @@ export default function SlimeTetris({ onBack }: Props) {
 
           {/* Status */}
           {isSlimeFalling && (
-            <div className="bg-emerald-900/40 border border-emerald-600/50 rounded-lg p-3">
+            <div className="bg-emerald-900/40 border border-emerald-600/50 rounded-lg p-3 min-w-[100px]">
               <p className="text-emerald-400 text-xs font-semibold animate-pulse">
                 Slime falling...
               </p>
@@ -311,7 +311,7 @@ export default function SlimeTetris({ onBack }: Props) {
           )}
 
           {/* Controls help */}
-          <div className="bg-gray-900 border border-gray-700 rounded-lg p-3 text-xs text-gray-500 space-y-1">
+          <div className="bg-gray-900 border border-gray-700 rounded-lg p-3 min-w-[180px] text-xs text-gray-500 space-y-1">
             <p className="text-gray-400 font-semibold mb-2">Controls</p>
             <p>← → Move</p>
             <p>Space Rotate</p>
