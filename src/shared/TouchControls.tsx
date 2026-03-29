@@ -7,6 +7,7 @@ interface Props {
   onSoftDropEnd: () => void
   onRotate: () => void
   onHardDrop: () => void
+  onHold?: () => void
 }
 
 interface BtnProps {
@@ -61,6 +62,7 @@ export default function TouchControls({
   onSoftDropEnd,
   onRotate,
   onHardDrop,
+  onHold,
 }: Props) {
   return (
     <div
@@ -125,22 +127,42 @@ export default function TouchControls({
         </Btn>
       </div>
 
-      {/* Right side: rotate button (large, prominent) */}
-      <Btn
-        onPress={onRotate}
-        label="Rotate"
-        style={{
-          width: 72,
-          height: 72,
-          borderRadius: '50%',
-          background: 'rgba(251,191,36,0.3)',
-          border: '2px solid rgba(251,191,36,0.65)',
-          boxShadow: '0 4px 14px rgba(251,191,36,0.35), inset 0 1px 0 rgba(255,255,255,0.2)',
-          fontSize: 30,
-        }}
-      >
-        ↻
-      </Btn>
+      {/* Right side: hold (optional) + rotate button */}
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8 }}>
+        {onHold && (
+          <Btn
+            onPress={onHold}
+            label="Hold"
+            style={{
+              width: 56,
+              height: 56,
+              borderRadius: 12,
+              background: 'rgba(148,163,184,0.15)',
+              border: '2px solid rgba(148,163,184,0.4)',
+              fontSize: 13,
+              fontWeight: 700,
+              letterSpacing: '0.05em',
+            }}
+          >
+            HOLD
+          </Btn>
+        )}
+        <Btn
+          onPress={onRotate}
+          label="Rotate"
+          style={{
+            width: 72,
+            height: 72,
+            borderRadius: '50%',
+            background: 'rgba(251,191,36,0.3)',
+            border: '2px solid rgba(251,191,36,0.65)',
+            boxShadow: '0 4px 14px rgba(251,191,36,0.35), inset 0 1px 0 rgba(255,255,255,0.2)',
+            fontSize: 30,
+          }}
+        >
+          ↻
+        </Btn>
+      </div>
     </div>
   )
 }

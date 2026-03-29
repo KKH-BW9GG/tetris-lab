@@ -322,6 +322,7 @@ export default function ColorMatchTetris({ onBack }: Props) {
           onSoftDropEnd={softDropEnd}
           onRotate={rotate}
           onHardDrop={hardDrop}
+          onHold={hold}
         />
       )}
     </div>

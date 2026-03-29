@@ -350,6 +350,7 @@ export default function SlimeTetris({ onBack }: Props) {
           onSoftDropEnd={softDropEnd}
           onRotate={rotate}
           onHardDrop={hardDrop}
+          onHold={hold}
         />
       )}
     </div>

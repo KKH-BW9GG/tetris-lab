@@ -387,6 +387,7 @@ export default function GravityTetris({ onBack }: Props) {
           onSoftDropEnd={softDropEnd}
           onRotate={rotate}
           onHardDrop={hardDrop}
+          onHold={hold}
         />
       )}
 

@@ -427,6 +427,7 @@ export default function SprintTetris({ onBack }: Props) {
           onSoftDropEnd={softDropEnd}
           onRotate={rotate}
           onHardDrop={hardDrop}
+          onHold={hold}
         />
       )}
 
