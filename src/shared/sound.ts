@@ -6,10 +6,36 @@
 let ctx: AudioContext | null = null
 
 function getCtx(): AudioContext {
-  if (!ctx) ctx = new AudioContext()
-  // モバイルで suspend されていたら resume
-  if (ctx.state === 'suspended') ctx.resume()
+  if (!ctx) {
+    ctx = new AudioContext()
+  }
+  if (ctx.state === 'suspended') {
+    ctx.resume().catch(() => {})
+  }
   return ctx
+}
+
+/**
+ * ユーザー操作イベントから呼ぶ。iOS Safariで AudioContext を確実にunlockする。
+ * ゲーム開始・READYキー入力のタイミングで呼ぶことを推奨。
+ */
+export function unlockAudio(): void {
+  if (!ctx) {
+    ctx = new AudioContext()
+  }
+  if (ctx.state === 'suspended') {
+    ctx.resume().catch(() => {})
+  }
+  // iOS Safari用: 無音バッファを再生してunlock
+  try {
+    const buffer = ctx.createBuffer(1, 1, 22050)
+    const source = ctx.createBufferSource()
+    source.buffer = buffer
+    source.connect(ctx.destination)
+    source.start(0)
+  } catch {
+    // ignore
+  }
 }
 
 function playTone(
