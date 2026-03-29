@@ -1,7 +1,8 @@
 import { useState, useEffect, useRef } from 'react'
 import { useColorMatchTetris } from './useColorMatchTetris'
 import { useDAS } from '../../shared/useDAS'
-import { BOARD_COLS, BOARD_ROWS, CELL_SIZE } from '../../shared/tetrominos'
+import { useCellSize } from '../../shared/useCellSize'
+import { BOARD_COLS, BOARD_ROWS } from '../../shared/tetrominos'
 import type { Cell } from '../../shared/types'
 import TouchControls from '../../shared/TouchControls'
 import LeaderboardModal, { WeeklyTable } from '../../shared/LeaderboardModal'
@@ -122,6 +123,7 @@ export default function ColorMatchTetris({ onBack }: Props) {
     hold,
   } = useColorMatchTetris()
   useDAS(moveLeft, moveRight)
+  const cellSize = useCellSize()
 
   const [showLeaderboard, setShowLeaderboard] = useState(false)
   const [scoreHighlight, setScoreHighlight] = useState(false)
@@ -145,8 +147,8 @@ export default function ColorMatchTetris({ onBack }: Props) {
     if (gameOver) stopBGM()
   }, [gameOver])
 
-  const boardWidth = BOARD_COLS * CELL_SIZE
-  const boardHeight = BOARD_ROWS * CELL_SIZE
+  const boardWidth = BOARD_COLS * cellSize
+  const boardHeight = BOARD_ROWS * cellSize
 
   return (
     <div className="min-h-screen bg-gray-950 flex flex-col items-center justify-center p-4">
@@ -185,13 +187,13 @@ export default function ColorMatchTetris({ onBack }: Props) {
           <div
             style={{
               display: 'grid',
-              gridTemplateColumns: `repeat(${BOARD_COLS}, ${CELL_SIZE}px)`,
-              gridTemplateRows: `repeat(${BOARD_ROWS}, ${CELL_SIZE}px)`,
+              gridTemplateColumns: `repeat(${BOARD_COLS}, ${cellSize}px)`,
+              gridTemplateRows: `repeat(${BOARD_ROWS}, ${cellSize}px)`,
             }}
           >
             {displayBoard.map((row, r) =>
               row.map((cell, c) => (
-                <BoardCell key={`${r}-${c}`} cell={cell} isClearing={isClearing} />
+                <BoardCell key={`${r}-${c}`} cell={cell} isClearing={isClearing} cellSize={cellSize} />
               ))
             )}
           </div>
@@ -338,9 +340,10 @@ export default function ColorMatchTetris({ onBack }: Props) {
 interface BoardCellProps {
   cell: Cell & { flash?: boolean; ghost?: boolean }
   isClearing: boolean
+  cellSize: number
 }
 
-function BoardCell({ cell, isClearing }: BoardCellProps) {
+function BoardCell({ cell, isClearing, cellSize }: BoardCellProps) {
   const isEmpty = cell.kind === 'empty'
   const isFlash = cell.flash && isClearing
   const isGhost = (cell as Cell & { ghost?: boolean }).ghost === true
@@ -369,8 +372,8 @@ function BoardCell({ cell, isClearing }: BoardCellProps) {
   return (
     <div
       style={{
-        width: CELL_SIZE,
-        height: CELL_SIZE,
+        width: cellSize,
+        height: cellSize,
         backgroundColor: bgColor,
         boxShadow,
         opacity,

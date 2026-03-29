@@ -10,6 +10,15 @@ interface Props {
   onHold?: () => void
 }
 
+/** Responsive button size: shrink on small screens */
+function getBtnSize(): number {
+  if (typeof window === 'undefined') return 56
+  const vw = window.innerWidth
+  if (vw < 360) return 44
+  if (vw < 420) return 50
+  return 56
+}
+
 interface BtnProps {
   onPress: () => void
   onRelease?: () => void
@@ -18,19 +27,19 @@ interface BtnProps {
   label?: string
 }
 
-function Btn({ onPress, onRelease, children, style, label }: BtnProps) {
+function Btn({ onPress, onRelease, children, style }: BtnProps) {
+  const size = getBtnSize()
   return (
     <button
-      aria-label={label}
       className="touch-btn"
       style={{
-        width: 64,
-        height: 64,
-        borderRadius: 14,
+        width: size,
+        height: size,
+        borderRadius: 12,
         background: 'rgba(255,255,255,0.1)',
         border: '2px solid rgba(255,255,255,0.2)',
         color: '#ffffff',
-        fontSize: 26,
+        fontSize: size < 50 ? 20 : 24,
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
@@ -52,7 +61,8 @@ function Btn({ onPress, onRelease, children, style, label }: BtnProps) {
 
 /** Invisible spacer to keep D-pad grid aligned */
 function Spacer() {
-  return <div style={{ width: 64, height: 64 }} />
+  const size = getBtnSize()
+  return <div style={{ width: size, height: size }} />
 }
 
 export default function TouchControls({
@@ -64,6 +74,9 @@ export default function TouchControls({
   onHardDrop,
   onHold,
 }: Props) {
+  const size = getBtnSize()
+  const gap = size < 50 ? 4 : 6
+
   return (
     <div
       style={{
@@ -71,14 +84,13 @@ export default function TouchControls({
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'center',
-        gap: 24,
-        marginTop: 16,
-        padding: '0 8px',
+        gap: 16,
+        marginTop: 8,
+        padding: '0 4px',
       }}
     >
-      {/* Left side: D-pad cross (left / down / right in a row, up in center top) */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 64px)', gridTemplateRows: 'repeat(2, 64px)', gap: 6 }}>
-        {/* Row 1: empty | hard-drop | empty */}
+      {/* Left side: D-pad cross */}
+      <div style={{ display: 'grid', gridTemplateColumns: `repeat(3, ${size}px)`, gridTemplateRows: `repeat(2, ${size}px)`, gap }}>
         <Spacer />
         <Btn
           onPress={onHardDrop}
@@ -93,7 +105,6 @@ export default function TouchControls({
         </Btn>
         <Spacer />
 
-        {/* Row 2: left | soft-drop | right */}
         <Btn
           onPress={onLeft}
           label="Move Left"
@@ -127,19 +138,19 @@ export default function TouchControls({
         </Btn>
       </div>
 
-      {/* Right side: hold (optional) + rotate button */}
-      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8 }}>
+      {/* Right side: hold + rotate */}
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6 }}>
         {onHold && (
           <Btn
             onPress={onHold}
             label="Hold"
             style={{
-              width: 56,
-              height: 56,
-              borderRadius: 12,
+              width: size - 8,
+              height: size - 8,
+              borderRadius: 10,
               background: 'rgba(148,163,184,0.15)',
               border: '2px solid rgba(148,163,184,0.4)',
-              fontSize: 13,
+              fontSize: 11,
               fontWeight: 700,
               letterSpacing: '0.05em',
             }}
@@ -151,13 +162,13 @@ export default function TouchControls({
           onPress={onRotate}
           label="Rotate"
           style={{
-            width: 72,
-            height: 72,
+            width: size + 8,
+            height: size + 8,
             borderRadius: '50%',
             background: 'rgba(251,191,36,0.3)',
             border: '2px solid rgba(251,191,36,0.65)',
             boxShadow: '0 4px 14px rgba(251,191,36,0.35), inset 0 1px 0 rgba(255,255,255,0.2)',
-            fontSize: 30,
+            fontSize: size < 50 ? 24 : 28,
           }}
         >
           ↻

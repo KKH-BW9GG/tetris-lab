@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, type CSSProperties } from 'react'
-import { BOARD_COLS, BOARD_ROWS, CELL_SIZE } from '../../shared/tetrominos'
+import { BOARD_COLS, BOARD_ROWS } from '../../shared/tetrominos'
+import { useCellSize } from '../../shared/useCellSize'
 import type { Cell } from '../../shared/types'
 import { useSlimeTetris } from './useSlimeTetris'
 import { useDAS } from '../../shared/useDAS'
@@ -94,6 +95,7 @@ function HoldPiecePreview({ piece }: { piece: { shape: number[][], color: string
 export default function SlimeTetris({ onBack }: Props) {
   const { state, ghostPiece, restart, moveLeft, moveRight, rotate, hardDrop, softDropStart, softDropEnd, togglePause, hold } = useSlimeTetris()
   useDAS(moveLeft, moveRight)
+  const cellSize = useCellSize()
   const { board, gameOver, score, lines, isCurrentSlime, isSlimeFalling, isTopScore, paused, flashingRows, nextPiece, waiting, heldPiece, canHold } = state
   const [showLeaderboard, setShowLeaderboard] = useState(false)
   const [scoreHighlight, setScoreHighlight] = useState(false)
@@ -117,8 +119,8 @@ export default function SlimeTetris({ onBack }: Props) {
     if (gameOver) stopBGM()
   }, [gameOver])
 
-  const boardWidth = BOARD_COLS * CELL_SIZE
-  const boardHeight = BOARD_ROWS * CELL_SIZE
+  const boardWidth = BOARD_COLS * cellSize
+  const boardHeight = BOARD_ROWS * cellSize
 
   return (
     <div className="min-h-screen bg-gray-950 flex flex-col items-center justify-center p-4 select-none">
@@ -156,10 +158,10 @@ export default function SlimeTetris({ onBack }: Props) {
                 className={getCellClass(cell, isCurrentSlime && cell.kind === 'slime')}
                 style={{
                   position: 'absolute',
-                  left: c * CELL_SIZE,
-                  top: r * CELL_SIZE,
-                  width: CELL_SIZE,
-                  height: CELL_SIZE,
+                  left: c * cellSize,
+                  top: r * cellSize,
+                  width: cellSize,
+                  height: cellSize,
                   boxSizing: 'border-box',
                   ...getCellStyle(cell),
                 }}
@@ -171,8 +173,8 @@ export default function SlimeTetris({ onBack }: Props) {
           {ghostPiece && ghostPiece.shape.map((row, r) =>
             row.map((cell, c) => {
               if (!cell) return null
-              const left = (ghostPiece.x + c) * CELL_SIZE
-              const top = (ghostPiece.y + r) * CELL_SIZE
+              const left = (ghostPiece.x + c) * cellSize
+              const top = (ghostPiece.y + r) * cellSize
               return (
                 <div
                   key={`ghost-${r}-${c}`}
@@ -180,8 +182,8 @@ export default function SlimeTetris({ onBack }: Props) {
                     position: 'absolute',
                     left,
                     top,
-                    width: CELL_SIZE,
-                    height: CELL_SIZE,
+                    width: cellSize,
+                    height: cellSize,
                     border: `2px solid ${ghostPiece.color}`,
                     backgroundColor: `${ghostPiece.color}22`,
                     boxSizing: 'border-box',
@@ -196,7 +198,7 @@ export default function SlimeTetris({ onBack }: Props) {
             <div
               key={`flash-${r}`}
               className="flash-row"
-              style={{ top: r * CELL_SIZE, height: CELL_SIZE }}
+              style={{ top: r * cellSize, height: cellSize }}
             />
           ))}
 

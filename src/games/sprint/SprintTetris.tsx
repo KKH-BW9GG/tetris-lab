@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react'
 import { useSprintTetris, TARGET_LINES, formatElapsed } from './useSprintTetris'
 import { useDAS } from '../../shared/useDAS'
-import { CELL_SIZE, BOARD_COLS, BOARD_ROWS } from '../../shared/tetrominos'
+import { BOARD_COLS, BOARD_ROWS } from '../../shared/tetrominos'
+import { useCellSize } from '../../shared/useCellSize'
 import type { Board, Piece } from '../../shared/types'
 import TouchControls from '../../shared/TouchControls'
 import LeaderboardModal from '../../shared/LeaderboardModal'
@@ -20,11 +21,12 @@ interface BoardViewProps {
   piece: Piece | null
   ghostPiece: Piece | null
   flashingRows?: number[]
+  cellSize: number
 }
 
-function BoardView({ board, piece, ghostPiece, flashingRows = [] }: BoardViewProps) {
-  const boardWidth = CELL_SIZE * BOARD_COLS
-  const boardHeight = CELL_SIZE * BOARD_ROWS
+function BoardView({ board, piece, ghostPiece, flashingRows = [], cellSize }: BoardViewProps) {
+  const boardWidth = cellSize * BOARD_COLS
+  const boardHeight = cellSize * BOARD_ROWS
 
   return (
     <div
@@ -35,8 +37,8 @@ function BoardView({ board, piece, ghostPiece, flashingRows = [] }: BoardViewPro
       <div
         style={{
           display: 'grid',
-          gridTemplateColumns: `repeat(${BOARD_COLS}, ${CELL_SIZE}px)`,
-          gridTemplateRows: `repeat(${BOARD_ROWS}, ${CELL_SIZE}px)`,
+          gridTemplateColumns: `repeat(${BOARD_COLS}, ${cellSize}px)`,
+          gridTemplateRows: `repeat(${BOARD_ROWS}, ${cellSize}px)`,
         }}
       >
         {board.map((row, r) =>
@@ -45,8 +47,8 @@ function BoardView({ board, piece, ghostPiece, flashingRows = [] }: BoardViewPro
               key={`${r}-${c}`}
               className={cell.kind === 'empty' ? 'bg-gray-800 border-r border-b border-gray-700' : ''}
               style={{
-                width: CELL_SIZE,
-                height: CELL_SIZE,
+                width: cellSize,
+                height: cellSize,
                 backgroundColor: cell.kind !== 'empty' ? cell.color : undefined,
                 boxSizing: 'border-box',
               }}
@@ -60,8 +62,8 @@ function BoardView({ board, piece, ghostPiece, flashingRows = [] }: BoardViewPro
         ghostPiece.shape.map((row, r) =>
           row.map((cell, c) => {
             if (!cell) return null
-            const left = (ghostPiece.x + c) * CELL_SIZE
-            const top = (ghostPiece.y + r) * CELL_SIZE
+            const left = (ghostPiece.x + c) * cellSize
+            const top = (ghostPiece.y + r) * cellSize
             return (
               <div
                 key={`ghost-${r}-${c}`}
@@ -69,8 +71,8 @@ function BoardView({ board, piece, ghostPiece, flashingRows = [] }: BoardViewPro
                 style={{
                   left,
                   top,
-                  width: CELL_SIZE,
-                  height: CELL_SIZE,
+                  width: cellSize,
+                  height: cellSize,
                   border: '2px solid rgba(6,182,212,0.5)',
                   backgroundColor: 'rgba(6,182,212,0.12)',
                   boxSizing: 'border-box',
@@ -85,8 +87,8 @@ function BoardView({ board, piece, ghostPiece, flashingRows = [] }: BoardViewPro
         piece.shape.map((row, r) =>
           row.map((cell, c) => {
             if (!cell) return null
-            const left = (piece.x + c) * CELL_SIZE
-            const top = (piece.y + r) * CELL_SIZE
+            const left = (piece.x + c) * cellSize
+            const top = (piece.y + r) * cellSize
             return (
               <div
                 key={`piece-${r}-${c}`}
@@ -94,8 +96,8 @@ function BoardView({ board, piece, ghostPiece, flashingRows = [] }: BoardViewPro
                 style={{
                   left,
                   top,
-                  width: CELL_SIZE,
-                  height: CELL_SIZE,
+                  width: cellSize,
+                  height: cellSize,
                   backgroundColor: piece.color,
                   boxSizing: 'border-box',
                 }}
@@ -109,7 +111,7 @@ function BoardView({ board, piece, ghostPiece, flashingRows = [] }: BoardViewPro
         <div
           key={`flash-${r}`}
           className="flash-row"
-          style={{ top: r * CELL_SIZE, height: CELL_SIZE }}
+          style={{ top: r * cellSize, height: cellSize }}
         />
       ))}
     </div>
@@ -219,6 +221,7 @@ export default function SprintTetris({ onBack }: Props) {
   const { state, getGhostPiece, start, moveLeft, moveRight, rotate, hardDrop, hold, softDropStart, softDropEnd, togglePause } =
     useSprintTetris()
   useDAS(moveLeft, moveRight)
+  const cellSize = useCellSize()
 
   const [showLeaderboard, setShowLeaderboard] = useState(false)
   const [leaderboardShown, setLeaderboardShown] = useState(false)
@@ -249,7 +252,7 @@ export default function SprintTetris({ onBack }: Props) {
   }
 
   return (
-    <div className="min-h-screen bg-gray-950 text-white flex flex-col items-center justify-center gap-6 py-8">
+    <div className="min-h-screen bg-gray-950 text-white flex flex-col items-center justify-center gap-2 py-4">
       {/* ヘッダー */}
       <div className="flex items-center gap-4">
         <button
@@ -273,7 +276,7 @@ export default function SprintTetris({ onBack }: Props) {
       <div className="flex flex-wrap gap-4 justify-center items-start">
         {/* ボードエリア */}
         <div className="relative">
-          <BoardView board={state.board} piece={state.piece} ghostPiece={ghostPiece} flashingRows={state.flashingRows} />
+          <BoardView board={state.board} piece={state.piece} ghostPiece={ghostPiece} flashingRows={state.flashingRows} cellSize={cellSize} />
 
           {/* ポーズオーバーレイ */}
           {state.paused && !state.gameOver && !state.finished && (

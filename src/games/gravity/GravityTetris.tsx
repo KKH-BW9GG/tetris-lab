@@ -1,7 +1,8 @@
 import { useState, useEffect, useRef } from 'react'
 import { useGravityTetris, FLIP_ANIM_MS } from './useGravityTetris'
 import { useDAS } from '../../shared/useDAS'
-import { CELL_SIZE, BOARD_COLS, BOARD_ROWS } from '../../shared/tetrominos'
+import { BOARD_COLS, BOARD_ROWS } from '../../shared/tetrominos'
+import { useCellSize } from '../../shared/useCellSize'
 import type { Board, Piece } from '../../shared/types'
 import TouchControls from '../../shared/TouchControls'
 import LeaderboardModal from '../../shared/LeaderboardModal'
@@ -20,12 +21,13 @@ interface BoardViewProps {
   flipCountdown: number
   isFlipping: boolean
   flashingRows?: number[]
+  cellSize: number
 }
 
 
-function BoardView({ board, piece, ghostPiece, flipCountdown, isFlipping, flashingRows = [] }: BoardViewProps) {
-  const boardWidth = CELL_SIZE * BOARD_COLS
-  const boardHeight = CELL_SIZE * BOARD_ROWS
+function BoardView({ board, piece, ghostPiece, flipCountdown, isFlipping, flashingRows = [], cellSize }: BoardViewProps) {
+  const boardWidth = cellSize * BOARD_COLS
+  const boardHeight = cellSize * BOARD_ROWS
 
   const pulseAlpha = flipCountdown <= 5 && !isFlipping
     ? 0.4 + (5 - flipCountdown) * 0.12
@@ -46,8 +48,8 @@ function BoardView({ board, piece, ghostPiece, flipCountdown, isFlipping, flashi
       <div
         style={{
           display: 'grid',
-          gridTemplateColumns: `repeat(${BOARD_COLS}, ${CELL_SIZE}px)`,
-          gridTemplateRows: `repeat(${BOARD_ROWS}, ${CELL_SIZE}px)`,
+          gridTemplateColumns: `repeat(${BOARD_COLS}, ${cellSize}px)`,
+          gridTemplateRows: `repeat(${BOARD_ROWS}, ${cellSize}px)`,
         }}
       >
         {board.map((row, r) =>
@@ -56,8 +58,8 @@ function BoardView({ board, piece, ghostPiece, flipCountdown, isFlipping, flashi
               key={`${r}-${c}`}
               className={cell.kind === 'empty' ? 'bg-gray-800 border-r border-b border-gray-700' : 'cell-glow'}
               style={{
-                width: CELL_SIZE,
-                height: CELL_SIZE,
+                width: cellSize,
+                height: cellSize,
                 backgroundColor: cell.kind !== 'empty' ? cell.color : undefined,
                 boxSizing: 'border-box',
               }}
@@ -71,8 +73,8 @@ function BoardView({ board, piece, ghostPiece, flipCountdown, isFlipping, flashi
         ghostPiece.shape.map((row, r) =>
           row.map((cell, c) => {
             if (!cell) return null
-            const left = (ghostPiece.x + c) * CELL_SIZE
-            const top = (ghostPiece.y + r) * CELL_SIZE
+            const left = (ghostPiece.x + c) * cellSize
+            const top = (ghostPiece.y + r) * cellSize
             return (
               <div
                 key={`ghost-${r}-${c}`}
@@ -80,8 +82,8 @@ function BoardView({ board, piece, ghostPiece, flipCountdown, isFlipping, flashi
                 style={{
                   left,
                   top,
-                  width: CELL_SIZE,
-                  height: CELL_SIZE,
+                  width: cellSize,
+                  height: cellSize,
                   border: `2px solid ${ghostPiece.color}`,
                   backgroundColor: `${ghostPiece.color}22`,
                   boxSizing: 'border-box',
@@ -95,8 +97,8 @@ function BoardView({ board, piece, ghostPiece, flipCountdown, isFlipping, flashi
         piece.shape.map((row, r) =>
           row.map((cell, c) => {
             if (!cell) return null
-            const left = (piece.x + c) * CELL_SIZE
-            const top = (piece.y + r) * CELL_SIZE
+            const left = (piece.x + c) * cellSize
+            const top = (piece.y + r) * cellSize
             return (
               <div
                 key={`piece-${r}-${c}`}
@@ -104,8 +106,8 @@ function BoardView({ board, piece, ghostPiece, flipCountdown, isFlipping, flashi
                 style={{
                   left,
                   top,
-                  width: CELL_SIZE,
-                  height: CELL_SIZE,
+                  width: cellSize,
+                  height: cellSize,
                   backgroundColor: piece.color,
                   boxSizing: 'border-box',
                 }}
@@ -119,7 +121,7 @@ function BoardView({ board, piece, ghostPiece, flipCountdown, isFlipping, flashi
         <div
           key={`flash-${r}`}
           className="flash-row"
-          style={{ top: r * CELL_SIZE, height: CELL_SIZE }}
+          style={{ top: r * cellSize, height: cellSize }}
         />
       ))}
     </div>
@@ -189,6 +191,7 @@ function HoldPiecePreview({ piece }: { piece: Piece }) {
 export default function GravityTetris({ onBack }: Props) {
   const { state, ghostPiece, start, moveLeft, moveRight, rotate, hardDrop, softDropStart, softDropEnd, togglePause, hold } = useGravityTetris()
   useDAS(moveLeft, moveRight)
+  const cellSize = useCellSize()
   const [showLeaderboard, setShowLeaderboard] = useState(false)
   const [scoreHighlight, setScoreHighlight] = useState(false)
   const prevScoreRef = useRef(state.score)
@@ -214,7 +217,7 @@ export default function GravityTetris({ onBack }: Props) {
   const flipLabel = state.gravity === 'down' ? '↓ 通常重力' : '↑ 反転重力'
 
   return (
-    <div className="min-h-screen bg-gray-950 text-white flex flex-col items-center justify-center gap-6 py-8">
+    <div className="min-h-screen bg-gray-950 text-white flex flex-col items-center justify-center gap-2 py-4 overflow-y-auto">
       <div className="flex items-center gap-4">
         <button
           onClick={onBack}
@@ -244,7 +247,7 @@ export default function GravityTetris({ onBack }: Props) {
             }}
           >
             <div className="relative">
-              <BoardView board={state.board} piece={state.piece} ghostPiece={ghostPiece} flipCountdown={state.flipCountdown} isFlipping={state.isFlipping} flashingRows={state.flashingRows} />
+              <BoardView board={state.board} piece={state.piece} ghostPiece={ghostPiece} flipCountdown={state.flipCountdown} isFlipping={state.isFlipping} flashingRows={state.flashingRows} cellSize={cellSize} />
 
               {/* 大型カウントダウン: 残り3秒以内かつアニメーション中でない時 */}
               {!state.isFlipping && state.flipCountdown <= 3 && state.flipCountdown > 0 && !state.paused && (

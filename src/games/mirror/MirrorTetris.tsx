@@ -1,7 +1,8 @@
 import { useState, useEffect, useRef } from 'react'
 import { useMirrorTetris } from './useMirrorTetris'
 import { useDAS } from '../../shared/useDAS'
-import { CELL_SIZE, BOARD_COLS, BOARD_ROWS } from '../../shared/tetrominos'
+import { BOARD_COLS, BOARD_ROWS } from '../../shared/tetrominos'
+import { useCellSize } from '../../shared/useCellSize'
 import type { Board, Piece } from '../../shared/types'
 import TouchControls from '../../shared/TouchControls'
 import LeaderboardModal, { WeeklyTable } from '../../shared/LeaderboardModal'
@@ -18,6 +19,7 @@ interface BoardViewProps {
   mirrorPiece: Piece | null
   ghostPiece: Piece | null
   flashingRows?: number[]
+  cellSize: number
 }
 
 /** メインピースとミラーピースの水平距離（センター列距離）を返す */
@@ -27,9 +29,9 @@ function getPieceCenterDistance(piece: Piece, mirrorPiece: Piece): number {
   return Math.abs(mainCenter - mirrorCenter)
 }
 
-function BoardView({ board, piece, mirrorPiece, ghostPiece, flashingRows = [] }: BoardViewProps) {
-  const boardWidth = CELL_SIZE * BOARD_COLS
-  const boardHeight = CELL_SIZE * BOARD_ROWS
+function BoardView({ board, piece, mirrorPiece, ghostPiece, flashingRows = [], cellSize }: BoardViewProps) {
+  const boardWidth = cellSize * BOARD_COLS
+  const boardHeight = cellSize * BOARD_ROWS
 
   const showDanger =
     piece !== null &&
@@ -45,8 +47,8 @@ function BoardView({ board, piece, mirrorPiece, ghostPiece, flashingRows = [] }:
       <div
         style={{
           display: 'grid',
-          gridTemplateColumns: `repeat(${BOARD_COLS}, ${CELL_SIZE}px)`,
-          gridTemplateRows: `repeat(${BOARD_ROWS}, ${CELL_SIZE}px)`,
+          gridTemplateColumns: `repeat(${BOARD_COLS}, ${cellSize}px)`,
+          gridTemplateRows: `repeat(${BOARD_ROWS}, ${cellSize}px)`,
         }}
       >
         {board.map((row, r) =>
@@ -55,8 +57,8 @@ function BoardView({ board, piece, mirrorPiece, ghostPiece, flashingRows = [] }:
               key={`${r}-${c}`}
               className={cell.kind === 'empty' ? 'bg-gray-800 border-r border-b border-gray-700' : ''}
               style={{
-                width: CELL_SIZE,
-                height: CELL_SIZE,
+                width: cellSize,
+                height: cellSize,
                 backgroundColor: cell.kind !== 'empty' ? cell.color : undefined,
                 boxSizing: 'border-box',
               }}
@@ -70,8 +72,8 @@ function BoardView({ board, piece, mirrorPiece, ghostPiece, flashingRows = [] }:
         mirrorPiece.shape.map((row, r) =>
           row.map((cell, c) => {
             if (!cell) return null
-            const left = (mirrorPiece.x + c) * CELL_SIZE
-            const top = (mirrorPiece.y + r) * CELL_SIZE
+            const left = (mirrorPiece.x + c) * cellSize
+            const top = (mirrorPiece.y + r) * cellSize
             return (
               <div
                 key={`mirror-${r}-${c}`}
@@ -79,8 +81,8 @@ function BoardView({ board, piece, mirrorPiece, ghostPiece, flashingRows = [] }:
                 style={{
                   left,
                   top,
-                  width: CELL_SIZE,
-                  height: CELL_SIZE,
+                  width: cellSize,
+                  height: cellSize,
                   backgroundColor: mirrorPiece.color,
                   opacity: 0.6,
                   filter: 'hue-rotate(160deg) saturate(1.4)',
@@ -97,8 +99,8 @@ function BoardView({ board, piece, mirrorPiece, ghostPiece, flashingRows = [] }:
         ghostPiece.shape.map((row, r) =>
           row.map((cell, c) => {
             if (!cell) return null
-            const left = (ghostPiece.x + c) * CELL_SIZE
-            const top = (ghostPiece.y + r) * CELL_SIZE
+            const left = (ghostPiece.x + c) * cellSize
+            const top = (ghostPiece.y + r) * cellSize
             return (
               <div
                 key={`ghost-${r}-${c}`}
@@ -106,8 +108,8 @@ function BoardView({ board, piece, mirrorPiece, ghostPiece, flashingRows = [] }:
                 style={{
                   left,
                   top,
-                  width: CELL_SIZE,
-                  height: CELL_SIZE,
+                  width: cellSize,
+                  height: cellSize,
                   border: `2px solid ${ghostPiece.color}`,
                   backgroundColor: `${ghostPiece.color}22`,
                   boxSizing: 'border-box',
@@ -122,8 +124,8 @@ function BoardView({ board, piece, mirrorPiece, ghostPiece, flashingRows = [] }:
         piece.shape.map((row, r) =>
           row.map((cell, c) => {
             if (!cell) return null
-            const left = (piece.x + c) * CELL_SIZE
-            const top = (piece.y + r) * CELL_SIZE
+            const left = (piece.x + c) * cellSize
+            const top = (piece.y + r) * cellSize
             return (
               <div
                 key={`piece-${r}-${c}`}
@@ -131,8 +133,8 @@ function BoardView({ board, piece, mirrorPiece, ghostPiece, flashingRows = [] }:
                 style={{
                   left,
                   top,
-                  width: CELL_SIZE,
-                  height: CELL_SIZE,
+                  width: cellSize,
+                  height: cellSize,
                   backgroundColor: piece.color,
                   boxSizing: 'border-box',
                   border: '1px solid rgba(255,255,255,0.3)',
@@ -165,7 +167,7 @@ function BoardView({ board, piece, mirrorPiece, ghostPiece, flashingRows = [] }:
         <div
           key={`flash-${r}`}
           className="flash-row"
-          style={{ top: r * CELL_SIZE, height: CELL_SIZE }}
+          style={{ top: r * cellSize, height: cellSize }}
         />
       ))}
     </div>
@@ -206,6 +208,7 @@ export default function MirrorTetris({ onBack }: Props) {
   const { state, ghostPiece, start, moveLeft, moveRight, rotate, hardDrop, softDropStart, softDropEnd, togglePause } =
     useMirrorTetris()
   useDAS(moveLeft, moveRight)
+  const cellSize = useCellSize()
   const [showLeaderboard, setShowLeaderboard] = useState(false)
   const [scoreHighlight, setScoreHighlight] = useState(false)
   const prevScoreRef = useRef(state.score)
@@ -229,7 +232,7 @@ export default function MirrorTetris({ onBack }: Props) {
   }, [state.score])
 
   return (
-    <div className="min-h-screen bg-gray-950 text-white flex flex-col items-center justify-center gap-6 py-8">
+    <div className="min-h-screen bg-gray-950 text-white flex flex-col items-center justify-center gap-2 py-4">
       {/* ヘッダー */}
       <div className="flex items-center gap-4">
         <button
@@ -258,6 +261,7 @@ export default function MirrorTetris({ onBack }: Props) {
           mirrorPiece={state.mirrorPiece}
           ghostPiece={ghostPiece}
           flashingRows={state.flashingRows}
+          cellSize={cellSize}
         />
         {/* READY オーバーレイ */}
         {state.waiting && (
