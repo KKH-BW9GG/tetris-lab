@@ -99,7 +99,7 @@ export default function App() {
             letterSpacing: '0.2em',
           }}
         >
-          TETRIS LAB
+          STACK LAB
         </h1>
         <p className="text-indigo-400 text-sm tracking-[0.3em] uppercase mt-2 font-semibold">
           5 Variant Modes

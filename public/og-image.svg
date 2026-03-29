@@ -23,7 +23,7 @@
   <rect x="1040" y="230" width="50" height="50" rx="4" fill="#f97316" opacity="0.8"/>
   <rect x="1040" y="280" width="50" height="50" rx="4" fill="#f97316" opacity="0.8"/>
   <!-- タイトル -->
-  <text x="600" y="260" font-family="system-ui, sans-serif" font-size="96" font-weight="900" text-anchor="middle" fill="url(#titleGrad)" letter-spacing="8">TETRIS LAB</text>
+  <text x="600" y="260" font-family="system-ui, sans-serif" font-size="96" font-weight="900" text-anchor="middle" fill="url(#titleGrad)" letter-spacing="8">STACK LAB</text>
   <!-- サブタイトル -->
   <text x="600" y="340" font-family="system-ui, sans-serif" font-size="32" text-anchor="middle" fill="#94a3b8" letter-spacing="4">5 GAME VARIANTS</text>
   <!-- ゲーム名リスト -->

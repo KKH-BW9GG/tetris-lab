@@ -1,6 +1,6 @@
 {
-  "name": "TETRIS LAB",
-  "short_name": "TETRIS LAB",
+  "name": "STACK LAB",
+  "short_name": "STACK LAB",
   "description": "5種類のテトリスバリアントが遊べるブラウザゲーム",
   "start_url": "/",
   "display": "standalone",
