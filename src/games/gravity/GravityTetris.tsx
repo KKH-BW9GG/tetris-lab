@@ -156,8 +156,38 @@ function NextPiecePreview({ piece }: { piece: Piece }) {
   )
 }
 
+function HoldPiecePreview({ piece }: { piece: Piece }) {
+  const previewSize = 20
+  const cols = piece.shape[0].length
+  const rows = piece.shape.length
+  return (
+    <div
+      style={{
+        display: 'grid',
+        gridTemplateColumns: `repeat(${cols}, ${previewSize}px)`,
+        gridTemplateRows: `repeat(${rows}, ${previewSize}px)`,
+      }}
+    >
+      {piece.shape.map((row, r) =>
+        row.map((cell, c) => (
+          <div
+            key={`hold-${r}-${c}`}
+            style={{
+              width: previewSize,
+              height: previewSize,
+              backgroundColor: cell ? piece.color : 'transparent',
+              border: cell ? '1px solid rgba(0,0,0,0.3)' : 'none',
+              boxSizing: 'border-box',
+            }}
+          />
+        ))
+      )}
+    </div>
+  )
+}
+
 export default function GravityTetris({ onBack }: Props) {
-  const { state, ghostPiece, start, moveLeft, moveRight, rotate, hardDrop, softDropStart, softDropEnd, togglePause } = useGravityTetris()
+  const { state, ghostPiece, start, moveLeft, moveRight, rotate, hardDrop, softDropStart, softDropEnd, togglePause, hold } = useGravityTetris()
   useDAS(moveLeft, moveRight)
   const [showLeaderboard, setShowLeaderboard] = useState(false)
   const [scoreHighlight, setScoreHighlight] = useState(false)
@@ -267,6 +297,18 @@ export default function GravityTetris({ onBack }: Props) {
 
         {/* サイドバー */}
         <div className="flex flex-col gap-4 min-w-[140px]">
+          {/* HOLD */}
+          <div className={`bg-gray-900 rounded-lg p-3 border text-center ${!state.canHold ? 'border-gray-800 opacity-50' : 'border-indigo-500'}`}>
+            <div className="text-xs text-gray-400 mb-2">HOLD</div>
+            <div className="flex justify-center items-center min-h-[48px]">
+              {state.heldPiece ? (
+                <HoldPiecePreview piece={state.heldPiece} />
+              ) : (
+                <span className="text-gray-600 text-xs">—</span>
+              )}
+            </div>
+          </div>
+
           <div className="bg-gray-900 rounded-lg p-3 border border-indigo-500 text-center">
             <div className="text-xs text-gray-400 mb-1">重力方向</div>
             <div
@@ -330,6 +372,7 @@ export default function GravityTetris({ onBack }: Props) {
             <div>Space 回転</div>
             <div>↓ ソフトドロップ</div>
             <div>↑ ハードドロップ</div>
+            <div>Shift ホールド</div>
             <div>P ポーズ</div>
           </div>
         </div>

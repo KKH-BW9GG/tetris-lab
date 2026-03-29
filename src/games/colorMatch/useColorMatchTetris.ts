@@ -182,6 +182,8 @@ export interface ColorMatchState {
   board: Board
   currentPiece: ColorPiece | null
   nextPiece: ColorPiece
+  heldPiece: { shape: number[][], colors: string[][] } | null
+  canHold: boolean
   score: number
   chain: number
   gameOver: boolean
@@ -203,6 +205,8 @@ export function useColorMatchTetris() {
     board: createEmptyBoard(),
     currentPiece: createColorPiece(),
     nextPiece: createColorPiece(),
+    heldPiece: null,
+    canHold: true,
     score: 0,
     chain: 0,
     gameOver: false,
@@ -297,6 +301,7 @@ export function useColorMatchTetris() {
           board: clearedBoard,
           currentPiece: over ? null : spawnPiece,
           nextPiece: newNext,
+          canHold: true,
           score: prev.score + earned,
           chain: 0,
           gameOver: over,
@@ -329,6 +334,50 @@ export function useColorMatchTetris() {
     }, softDrop ? 50 : FALL_INTERVAL)
     return () => clearInterval(interval)
   }, [state.gameOver, state.isClearing, state.paused, state.waiting, softDrop, lockPiece])
+
+  // ---------------------------------------------------------------
+  // ホールド
+  // ---------------------------------------------------------------
+
+  const hold = useCallback(() => {
+    if (gameOverRef.current || isClearingRef.current || pausedRef.current || waitingRef.current) return
+    setState(prev => {
+      if (!prev.currentPiece || !prev.canHold || prev.gameOver || prev.isClearing) return prev
+      const piece = prev.currentPiece
+      if (prev.heldPiece === null) {
+        // ホールドなし: currentPiece を保存し、nextPiece を次の currentPiece にする
+        const incoming: ColorPiece = {
+          ...prev.nextPiece,
+          x: spawnX(prev.nextPiece.shape),
+          y: 0,
+        }
+        if (isColliding(prev.board, asPiece(incoming))) return prev
+        return {
+          ...prev,
+          heldPiece: { shape: piece.shape, colors: piece.colors },
+          currentPiece: incoming,
+          nextPiece: createColorPiece(),
+          canHold: false,
+        }
+      } else {
+        // ホールドあり: heldPiece と交換
+        const incoming: ColorPiece = {
+          shape: prev.heldPiece.shape,
+          colors: prev.heldPiece.colors,
+          color: '',
+          x: spawnX(prev.heldPiece.shape),
+          y: 0,
+        }
+        if (isColliding(prev.board, asPiece(incoming))) return prev
+        return {
+          ...prev,
+          heldPiece: { shape: piece.shape, colors: piece.colors },
+          currentPiece: incoming,
+          canHold: false,
+        }
+      }
+    })
+  }, [])
 
   // ---------------------------------------------------------------
   // キー操作
@@ -390,9 +439,20 @@ export function useColorMatchTetris() {
       })
     }
 
+    const handleKeyHold = (e: KeyboardEvent) => {
+      if (e.key === 'Shift') {
+        e.preventDefault()
+        hold()
+      }
+    }
+
     window.addEventListener('keydown', handleKey)
-    return () => window.removeEventListener('keydown', handleKey)
-  }, [lockPiece])
+    window.addEventListener('keydown', handleKeyHold)
+    return () => {
+      window.removeEventListener('keydown', handleKey)
+      window.removeEventListener('keydown', handleKeyHold)
+    }
+  }, [lockPiece, hold])
 
   // ---------------------------------------------------------------
   // リスタート
@@ -407,6 +467,8 @@ export function useColorMatchTetris() {
       board: createEmptyBoard(),
       currentPiece: createColorPiece(),
       nextPiece: createColorPiece(),
+      heldPiece: null,
+      canHold: true,
       score: 0,
       chain: 0,
       gameOver: false,
@@ -533,6 +595,8 @@ export function useColorMatchTetris() {
   return {
     displayBoard: displayBoard as (Cell & { flash?: boolean; ghost?: boolean })[][],
     nextPiece: state.nextPiece,
+    heldPiece: state.heldPiece,
+    canHold: state.canHold,
     score: state.score,
     chain: state.chain,
     gameOver: state.gameOver,
@@ -548,5 +612,6 @@ export function useColorMatchTetris() {
     softDropStart,
     softDropEnd,
     togglePause,
+    hold,
   }
 }

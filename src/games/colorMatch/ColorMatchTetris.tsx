@@ -54,6 +54,47 @@ function NextPiecePreview({ shape, colors }: NextPiecePreviewProps) {
 }
 
 // ---------------------------------------------------------------
+// ホールドピースプレビュー
+// ---------------------------------------------------------------
+
+interface HoldPiecePreviewProps {
+  shape: number[][]
+  colors: string[][]
+}
+
+function HoldPiecePreview({ shape, colors }: HoldPiecePreviewProps) {
+  const rows = shape.length
+  const cols = shape[0].length
+  const previewSize = 20
+
+  return (
+    <div
+      style={{
+        display: 'grid',
+        gridTemplateColumns: `repeat(${cols}, ${previewSize}px)`,
+        gridTemplateRows: `repeat(${rows}, ${previewSize}px)`,
+        gap: '1px',
+      }}
+    >
+      {shape.map((row, r) =>
+        row.map((cell, c) => (
+          <div
+            key={`${r}-${c}`}
+            style={{
+              width: previewSize,
+              height: previewSize,
+              backgroundColor: cell ? colors[r][c] : 'transparent',
+              borderRadius: cell ? 2 : 0,
+              boxShadow: cell ? `inset 0 1px 2px rgba(255,255,255,0.3)` : 'none',
+            }}
+          />
+        ))
+      )}
+    </div>
+  )
+}
+
+// ---------------------------------------------------------------
 // メインコンポーネント
 // ---------------------------------------------------------------
 
@@ -61,6 +102,8 @@ export default function ColorMatchTetris({ onBack }: Props) {
   const {
     displayBoard,
     nextPiece,
+    heldPiece,
+    canHold,
     score,
     chain,
     gameOver,
@@ -200,6 +243,18 @@ export default function ColorMatchTetris({ onBack }: Props) {
 
         {/* サイドパネル */}
         <div className="flex flex-col gap-4 min-w-[140px]">
+          {/* HOLD */}
+          <div className={`bg-gray-900 border rounded p-3 ${!canHold ? 'border-gray-800 opacity-50' : 'border-orange-500'}`}>
+            <p className="text-gray-400 text-xs uppercase tracking-wider mb-2">Hold</p>
+            <div className="flex items-center justify-center min-h-[50px]">
+              {heldPiece ? (
+                <HoldPiecePreview shape={heldPiece.shape} colors={heldPiece.colors} />
+              ) : (
+                <span className="text-gray-600 text-xs">—</span>
+              )}
+            </div>
+          </div>
+
           {/* スコア */}
           <div className="bg-gray-900 border border-gray-700 rounded p-3">
             <p className="text-gray-400 text-xs uppercase tracking-wider mb-1">Score</p>
@@ -234,6 +289,7 @@ export default function ColorMatchTetris({ onBack }: Props) {
             <p>Space Rotate</p>
             <p>↓ Soft Drop</p>
             <p>↑ Hard Drop</p>
+            <p>Shift Hold</p>
             <p>P Pause</p>
           </div>
 

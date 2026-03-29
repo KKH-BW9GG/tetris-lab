@@ -30,6 +30,8 @@ export interface SlimeTetrisState {
   board: Board
   currentPiece: SlimePiece | null
   nextPiece: SlimePiece
+  heldPiece: SlimePiece | null
+  canHold: boolean
   score: number
   lines: number
   gameOver: boolean
@@ -95,6 +97,10 @@ export function useSlimeTetris() {
   const [nextPieceState, setNextPieceState] = useState<SlimePiece>(spawnPiece)
   const nextPieceRef = useRef<SlimePiece>(nextPieceState)
   nextPieceRef.current = nextPieceState
+  const [heldPiece, setHeldPiece] = useState<SlimePiece | null>(null)
+  const [canHold, setCanHold] = useState(true)
+  const heldPieceRef = useRef<SlimePiece | null>(null)
+  const canHoldRef = useRef(true)
   const [score, setScore] = useState(0)
   const [lines, setLines] = useState(0)
   const [gameOver, setGameOver] = useState(false)
@@ -162,6 +168,9 @@ export function useSlimeTetris() {
     }
     setBoard(afterClear)
     boardRef.current = afterClear
+
+    canHoldRef.current = true
+    setCanHold(true)
 
     // スライムセルが存在するか確認
     const hasSlime = afterClear.some(row => row.some(cell => cell.kind === 'slime'))
@@ -234,6 +243,35 @@ export function useSlimeTetris() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
+  // ---- hold ----
+  const hold = useCallback(() => {
+    if (gameOverRef.current || isSlimeFallingRef.current || pausedRef.current || waitingRef.current) return
+    const piece = currentPieceRef.current
+    if (!piece || !canHoldRef.current) return
+
+    const b = boardRef.current
+    const incoming: SlimePiece = heldPieceRef.current
+      ? { ...heldPieceRef.current, x: spawnX(heldPieceRef.current.shape), y: 0 }
+      : { ...nextPieceRef.current, x: spawnX(nextPieceRef.current.shape), y: 0 }
+
+    if (isColliding(b, incoming)) return
+
+    const newHeld: SlimePiece = { ...piece, x: 0, y: 0 }
+    const newNextPiece = heldPieceRef.current ? nextPieceRef.current : spawnPiece()
+    const hadHeld = heldPieceRef.current !== null
+
+    heldPieceRef.current = newHeld
+    canHoldRef.current = false
+
+    setHeldPiece(newHeld)
+    setCanHold(false)
+    setCurrentPiece(incoming)
+    if (!hadHeld) {
+      setNextPieceState(newNextPiece)
+      nextPieceRef.current = newNextPiece
+    }
+  }, [])
+
   // ---- keyboard handling ----
   const handleKey = useCallback((e: KeyboardEvent) => {
     if (e.key === 'p' || e.key === 'P') {
@@ -275,8 +313,11 @@ export function useSlimeTetris() {
       }
       lockPiece(b, dropped)
       setCurrentPiece(null)
+    } else if (e.key === 'Shift') {
+      e.preventDefault()
+      hold()
     }
-  }, [lockPiece])
+  }, [lockPiece, hold])
 
   useEffect(() => {
     window.addEventListener('keydown', handleKey)
@@ -305,6 +346,10 @@ export function useSlimeTetris() {
     setWaiting(true)
     waitingRef.current = true
     setFlashingRows([])
+    setHeldPiece(null)
+    heldPieceRef.current = null
+    setCanHold(true)
+    canHoldRef.current = true
     // spawn will happen via useEffect on next render... trigger manually
     setTimeout(() => spawnNext(emptyBoard), 0)
   }, [spawnNext])
@@ -337,6 +382,8 @@ export function useSlimeTetris() {
     board: displayBoard,
     currentPiece,
     nextPiece: nextPieceState,
+    heldPiece,
+    canHold,
     score,
     lines,
     gameOver,
@@ -411,5 +458,5 @@ export function useSlimeTetris() {
     return ghost.y === currentPiece.y ? null : ghost
   })()
 
-  return { state, ghostPiece, restart, moveLeft, moveRight, rotate, hardDrop, softDropStart, softDropEnd, togglePause }
+  return { state, ghostPiece, restart, moveLeft, moveRight, rotate, hardDrop, softDropStart, softDropEnd, togglePause, hold }
 }

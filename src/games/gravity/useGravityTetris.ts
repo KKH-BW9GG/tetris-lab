@@ -87,6 +87,8 @@ export interface GravityTetrisState {
   flashingRows: number[]
   levelUpFlash: boolean
   waiting: boolean
+  heldPiece: Piece | null
+  canHold: boolean
 }
 
 export function useGravityTetris() {
@@ -99,6 +101,7 @@ export function useGravityTetris() {
       gravity, flipCountdown: FLIP_INTERVAL_MS / 1000, lines: 0, level: 1,
       isFlipping: false, flipDirection: 'toUp', isTopScore: false, paused: false,
       flashingRows: [], levelUpFlash: false, waiting: true,
+      heldPiece: null, canHold: true,
     }
   })
 
@@ -110,6 +113,7 @@ export function useGravityTetris() {
   const gameOverRef = useRef(false)
   const isFlippingRef = useRef(false)
   const flipGenRef = useRef(0)
+  const holdRef = useRef<() => void>(() => {})
 
   // -------------------------------------------------------
   // dropTick
@@ -156,6 +160,7 @@ export function useGravityTetris() {
           ...prev, board: cleared, piece: nextPiece, nextPiece: newNextPiece,
           score: newScore, lines: newLines, level: newLevel,
           flashingRows: fullLines, levelUpFlash: leveledUp,
+          canHold: true,
         }
       }
       soundGameOver()
@@ -167,6 +172,29 @@ export function useGravityTetris() {
       }
     })
   }, [])
+
+  // -------------------------------------------------------
+  // hold
+  // -------------------------------------------------------
+  const hold = useCallback(() => {
+    setState(prev => {
+      if (!prev.piece || !prev.canHold || prev.gameOver || prev.paused || prev.waiting) return prev
+      const currentPiece = prev.piece
+      const incoming = prev.heldPiece
+        ? { ...prev.heldPiece, x: spawnX(prev.heldPiece.shape), y: spawnY(prev.heldPiece.shape, prev.gravity) }
+        : { ...prev.nextPiece, x: spawnX(prev.nextPiece.shape), y: spawnY(prev.nextPiece.shape, prev.gravity) }
+      const newNextPiece = prev.heldPiece ? prev.nextPiece : createPiece(prev.gravity)
+      if (isColliding(prev.board, incoming)) return prev
+      return {
+        ...prev,
+        piece: incoming,
+        heldPiece: { ...currentPiece, x: 0, y: 0 },
+        nextPiece: prev.heldPiece ? prev.nextPiece : newNextPiece,
+        canHold: false,
+      }
+    })
+  }, [])
+  holdRef.current = hold
 
   // -------------------------------------------------------
   // flipGravity
@@ -280,12 +308,17 @@ export function useGravityTetris() {
         return
       }
       if (gameOverRef.current || isFlippingRef.current || pausedRef.current) return
-      if ([' ', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key)) {
+      if ([' ', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Shift'].includes(e.key)) {
         e.preventDefault()
       }
 
       if (e.key === 'ArrowDown') {
         setSoftDrop(true)
+        return
+      }
+
+      if (e.key === 'Shift') {
+        holdRef.current()
         return
       }
 
@@ -320,7 +353,7 @@ export function useGravityTetris() {
             const nextPiece = prev.nextPiece
             const newNextPiece = createPiece(prev.gravity)
             if (!isColliding(cleared, nextPiece)) {
-              return { ...prev, board: cleared, piece: nextPiece, nextPiece: newNextPiece, score: newScore, lines: newLines, level: newLevel }
+              return { ...prev, board: cleared, piece: nextPiece, nextPiece: newNextPiece, score: newScore, lines: newLines, level: newLevel, canHold: true }
             }
             soundGameOver(); gameOverRef.current = true
             return { ...prev, board: cleared, piece: null, score: newScore, lines: newLines, level: newLevel, gameOver: true, isTopScore: isTopScore('gravity', newScore) }
@@ -384,6 +417,8 @@ export function useGravityTetris() {
       flashingRows: [],
       levelUpFlash: false,
       waiting: true,
+      heldPiece: null,
+      canHold: true,
     })
   }, [])
 
@@ -451,7 +486,7 @@ export function useGravityTetris() {
       const nextPiece = prev.nextPiece
       const newNextPiece = createPiece(prev.gravity)
       if (!isColliding(cleared, nextPiece)) {
-        return { ...prev, board: cleared, piece: nextPiece, nextPiece: newNextPiece, score: newScore, lines: newLines, level: newLevel, flashingRows: fullLines, levelUpFlash: leveledUp }
+        return { ...prev, board: cleared, piece: nextPiece, nextPiece: newNextPiece, score: newScore, lines: newLines, level: newLevel, flashingRows: fullLines, levelUpFlash: leveledUp, canHold: true }
       }
       soundGameOver(); gameOverRef.current = true
       return { ...prev, board: cleared, piece: null, score: newScore, lines: newLines, level: newLevel, gameOver: true, isTopScore: isTopScore('gravity', newScore), flashingRows: fullLines, levelUpFlash: false }
@@ -476,5 +511,5 @@ export function useGravityTetris() {
       ? getGhostPiece(state.board, state.piece, state.gravity)
       : null
 
-  return { state, ghostPiece, start, moveLeft, moveRight, rotate, hardDrop, softDropStart, softDropEnd, togglePause }
+  return { state, ghostPiece, start, moveLeft, moveRight, rotate, hardDrop, softDropStart, softDropEnd, togglePause, hold }
 }

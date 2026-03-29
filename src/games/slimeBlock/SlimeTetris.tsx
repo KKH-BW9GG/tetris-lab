@@ -66,10 +66,35 @@ function NextPiecePreview({ piece }: { piece: { shape: number[][], color: string
   )
 }
 
+function HoldPiecePreview({ piece }: { piece: { shape: number[][], color: string } }) {
+  const previewSize = 20
+  const cols = piece.shape[0].length
+  const rows = piece.shape.length
+  return (
+    <div style={{
+      display: 'grid',
+      gridTemplateColumns: `repeat(${cols}, ${previewSize}px)`,
+      gridTemplateRows: `repeat(${rows}, ${previewSize}px)`,
+    }}>
+      {piece.shape.map((row, r) =>
+        row.map((cell, c) => (
+          <div key={`hold-${r}-${c}`} style={{
+            width: previewSize,
+            height: previewSize,
+            backgroundColor: cell ? piece.color : 'transparent',
+            border: cell ? '1px solid rgba(0,0,0,0.3)' : 'none',
+            boxSizing: 'border-box',
+          }} />
+        ))
+      )}
+    </div>
+  )
+}
+
 export default function SlimeTetris({ onBack }: Props) {
   const { state, ghostPiece, restart, moveLeft, moveRight, rotate, hardDrop, softDropStart, softDropEnd, togglePause } = useSlimeTetris()
   useDAS(moveLeft, moveRight)
-  const { board, gameOver, score, lines, isCurrentSlime, isSlimeFalling, isTopScore, paused, flashingRows, nextPiece, waiting } = state
+  const { board, gameOver, score, lines, isCurrentSlime, isSlimeFalling, isTopScore, paused, flashingRows, nextPiece, waiting, heldPiece, canHold } = state
   const [showLeaderboard, setShowLeaderboard] = useState(false)
   const [scoreHighlight, setScoreHighlight] = useState(false)
   const prevScoreRef = useRef(score)
@@ -242,6 +267,18 @@ export default function SlimeTetris({ onBack }: Props) {
             <p className="text-green-400 text-xl font-bold tabular-nums">{lines}</p>
           </div>
 
+          {/* Hold */}
+          <div className={`bg-gray-900 border rounded p-3 ${!canHold ? 'border-gray-800 opacity-50' : 'border-emerald-500'}`}>
+            <p className="text-gray-400 text-xs uppercase tracking-wider mb-2">Hold</p>
+            <div className="flex items-center justify-center min-h-[50px]">
+              {heldPiece ? (
+                <HoldPiecePreview piece={heldPiece} />
+              ) : (
+                <span className="text-gray-600 text-xs">—</span>
+              )}
+            </div>
+          </div>
+
           {/* Next piece preview */}
           <div className="bg-gray-900 border border-gray-700 rounded p-3">
             <p className="text-gray-400 text-xs uppercase tracking-wider mb-2">Next</p>
@@ -280,6 +317,7 @@ export default function SlimeTetris({ onBack }: Props) {
             <p>Space Rotate</p>
             <p>↓ Soft drop</p>
             <p>↑ Hard drop</p>
+            <p>Shift Hold</p>
             <p>P Pause</p>
           </div>
 

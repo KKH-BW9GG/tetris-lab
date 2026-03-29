@@ -150,6 +150,39 @@ function NextPiecePreview({ piece }: { piece: Piece }) {
 }
 
 // -------------------------------------------------------
+// HoldPiecePreview
+// -------------------------------------------------------
+function HoldPiecePreview({ piece }: { piece: Piece }) {
+  const previewSize = 20
+  const cols = piece.shape[0].length
+  const rows = piece.shape.length
+  return (
+    <div
+      style={{
+        display: 'grid',
+        gridTemplateColumns: `repeat(${cols}, ${previewSize}px)`,
+        gridTemplateRows: `repeat(${rows}, ${previewSize}px)`,
+      }}
+    >
+      {piece.shape.map((row, r) =>
+        row.map((cell, c) => (
+          <div
+            key={`hold-${r}-${c}`}
+            style={{
+              width: previewSize,
+              height: previewSize,
+              backgroundColor: cell ? piece.color : 'transparent',
+              border: cell ? '1px solid rgba(0,0,0,0.3)' : 'none',
+              boxSizing: 'border-box',
+            }}
+          />
+        ))
+      )}
+    </div>
+  )
+}
+
+// -------------------------------------------------------
 // プログレスバー
 // -------------------------------------------------------
 function ProgressBar({ lines }: { lines: number }) {
@@ -183,7 +216,7 @@ function ProgressBar({ lines }: { lines: number }) {
 // SprintTetris
 // -------------------------------------------------------
 export default function SprintTetris({ onBack }: Props) {
-  const { state, getGhostPiece, start, moveLeft, moveRight, rotate, hardDrop, softDropStart, softDropEnd, togglePause } =
+  const { state, getGhostPiece, start, moveLeft, moveRight, rotate, hardDrop, hold, softDropStart, softDropEnd, togglePause } =
     useSprintTetris()
   useDAS(moveLeft, moveRight)
 
@@ -297,6 +330,18 @@ export default function SprintTetris({ onBack }: Props) {
 
         {/* サイドパネル */}
         <div className="flex flex-col gap-4 min-w-[140px]">
+          {/* HOLD */}
+          <div className={`bg-gray-900 rounded-lg p-3 border text-center ${!state.canHold ? 'border-gray-800 opacity-50' : 'border-cyan-500'}`}>
+            <div className="text-xs text-gray-400 mb-2">HOLD</div>
+            <div className="flex justify-center items-center min-h-[48px]">
+              {state.heldPiece ? (
+                <HoldPiecePreview piece={state.heldPiece} />
+              ) : (
+                <span className="text-gray-600 text-xs">—</span>
+              )}
+            </div>
+          </div>
+
           {/* タイマー */}
           <div className="bg-gray-900 rounded-lg p-3 border border-cyan-500 text-center">
             <div className="text-xs text-gray-400 mb-1">タイム</div>
@@ -348,6 +393,7 @@ export default function SprintTetris({ onBack }: Props) {
             <div>Space 回転</div>
             <div>↑ ハードドロップ</div>
             <div>↓ ソフトドロップ</div>
+            <div>Shift ホールド</div>
             <div>P ポーズ</div>
           </div>
 

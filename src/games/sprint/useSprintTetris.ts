@@ -29,6 +29,8 @@ export interface SprintTetrisState {
   board: Board
   piece: Piece | null
   nextPiece: Piece
+  heldPiece: Piece | null
+  canHold: boolean
   lines: number
   elapsedMs: number
   finished: boolean
@@ -48,6 +50,8 @@ function createInitialState(): SprintTetrisState {
     board: createEmptyBoard(),
     piece: createPiece(),
     nextPiece: createPiece(),
+    heldPiece: null,
+    canHold: true,
     lines: 0,
     elapsedMs: 0,
     finished: false,
@@ -151,6 +155,7 @@ export function useSprintTetris() {
           nextPiece: newNextPiece,
           lines: newLines,
           flashingRows: fullLines,
+          canHold: true,
         }
       }
       gameOverRef.current = true
@@ -202,6 +207,30 @@ export function useSprintTetris() {
   }, [state.flashingRows])
 
   // -------------------------------------------------------
+  // ホールド
+  // -------------------------------------------------------
+  const hold = useCallback(() => {
+    setState(prev => {
+      if (!prev.piece || !prev.canHold || prev.gameOver || prev.finished || prev.waiting || prev.paused) return prev
+      const currentPiece = prev.piece
+      const incoming: Piece = prev.heldPiece
+        ? { ...prev.heldPiece, x: spawnX(prev.heldPiece.shape), y: 0 }
+        : { ...prev.nextPiece, x: spawnX(prev.nextPiece.shape), y: 0 }
+      if (isColliding(prev.board, incoming)) return prev
+      const newNextPiece = prev.heldPiece
+        ? prev.nextPiece
+        : (() => { const t = randomTetromino(); return { shape: t.shape, color: t.color, x: spawnX(t.shape), y: 0 } })()
+      return {
+        ...prev,
+        piece: incoming,
+        heldPiece: { ...currentPiece, x: 0, y: 0 },
+        nextPiece: newNextPiece,
+        canHold: false,
+      }
+    })
+  }, [])
+
+  // -------------------------------------------------------
   // Effects: キーボード操作
   // -------------------------------------------------------
   useEffect(() => {
@@ -215,7 +244,7 @@ export function useSprintTetris() {
         return
       }
       if (gameOverRef.current || finishedRef.current || pausedRef.current) return
-      if ([' ', 'ArrowUp', 'ArrowDown'].includes(e.key)) {
+      if ([' ', 'ArrowUp', 'ArrowDown', 'Shift'].includes(e.key)) {
         e.preventDefault()
       }
 
@@ -228,6 +257,12 @@ export function useSprintTetris() {
 
       if (e.key === 'ArrowDown') {
         setSoftDrop(true)
+        return
+      }
+
+      if (e.key === 'Shift') {
+        e.preventDefault()
+        hold()
         return
       }
 
@@ -284,6 +319,7 @@ export function useSprintTetris() {
                 nextPiece: newNextPiece,
                 lines: newLines,
                 flashingRows: fullLines,
+                canHold: true,
               }
             }
             gameOverRef.current = true
@@ -310,7 +346,7 @@ export function useSprintTetris() {
       window.removeEventListener('keyup', onKeyUp)
       window.removeEventListener('blur', onBlur)
     }
-  }, [stopTimer])
+  }, [stopTimer, hold])
 
   // -------------------------------------------------------
   // クリーンアップ
@@ -435,6 +471,7 @@ export function useSprintTetris() {
           nextPiece: newNextPiece,
           lines: newLines,
           flashingRows: fullLines,
+          canHold: true,
         }
       }
       gameOverRef.current = true
@@ -455,6 +492,7 @@ export function useSprintTetris() {
     moveRight,
     rotate,
     hardDrop,
+    hold,
     softDropStart,
     softDropEnd,
     togglePause,
