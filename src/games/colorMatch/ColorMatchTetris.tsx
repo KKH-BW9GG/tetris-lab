@@ -151,7 +151,7 @@ export default function ColorMatchTetris({ onBack }: Props) {
   const boardHeight = BOARD_ROWS * cellSize
 
   return (
-    <div className="min-h-screen bg-gray-950 flex flex-col items-center justify-center p-4">
+    <div className="min-h-screen bg-gray-950 flex flex-col items-center justify-start p-4 overflow-y-auto">
       {/* ヘッダー */}
       <div className="flex items-center gap-4 mb-4">
         <button
@@ -246,7 +246,7 @@ export default function ColorMatchTetris({ onBack }: Props) {
         </div>
 
         {/* サイドパネル */}
-        <div className="flex flex-row flex-wrap gap-2 justify-center lg:flex-col lg:gap-4 min-w-[280px] lg:min-w-[140px]">
+        <div className="flex flex-row flex-wrap gap-2 justify-center lg:flex-col lg:gap-4 lg:min-w-[140px]">
           {/* HOLD */}
           <div className={`bg-gray-900 border rounded p-3 min-w-[100px] ${!canHold ? 'border-gray-800 opacity-50' : 'border-orange-500'}`}>
             <p className="text-gray-400 text-xs uppercase tracking-wider mb-2">Hold</p>
@@ -287,7 +287,7 @@ export default function ColorMatchTetris({ onBack }: Props) {
           </div>
 
           {/* 操作説明 */}
-          <div className="bg-gray-900 border border-gray-700 rounded p-3 min-w-[180px] text-xs text-gray-500 space-y-1">
+          <div className="bg-gray-900 border border-gray-700 rounded p-3 hidden lg:block min-w-[120px] text-xs text-gray-500 space-y-1">
             <p className="text-gray-400 font-semibold mb-2">Controls</p>
             <p>← → Move</p>
             <p>Space Rotate</p>
@@ -298,7 +298,7 @@ export default function ColorMatchTetris({ onBack }: Props) {
           </div>
 
           {/* ルール説明 */}
-          <div className="bg-gray-900 border border-gray-700 rounded p-3 min-w-[180px] text-xs text-gray-500 space-y-1">
+          <div className="bg-gray-900 border border-gray-700 rounded p-3 hidden lg:block min-w-[120px] text-xs text-gray-500 space-y-1">
             <p className="text-gray-400 font-semibold mb-2">Rules</p>
             <p>Line clear: row</p>
             <p>Color match:</p>

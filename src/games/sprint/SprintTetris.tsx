@@ -252,7 +252,7 @@ export default function SprintTetris({ onBack }: Props) {
   }
 
   return (
-    <div className="min-h-screen bg-gray-950 text-white flex flex-col items-center justify-center gap-2 py-4">
+    <div className="min-h-screen bg-gray-950 text-white flex flex-col items-center justify-start gap-2 py-4 overflow-y-auto">
       {/* ヘッダー */}
       <div className="flex items-center gap-4">
         <button
@@ -332,7 +332,7 @@ export default function SprintTetris({ onBack }: Props) {
         </div>
 
         {/* サイドパネル */}
-        <div className="flex flex-row flex-wrap gap-2 justify-center lg:flex-col lg:gap-4 min-w-[280px] lg:min-w-[140px]">
+        <div className="flex flex-row flex-wrap gap-2 justify-center lg:flex-col lg:gap-4 lg:min-w-[140px]">
           {/* HOLD */}
           <div className={`bg-gray-900 rounded-lg p-3 border text-center min-w-[100px] ${!state.canHold ? 'border-gray-800 opacity-50' : 'border-cyan-500'}`}>
             <div className="text-xs text-gray-400 mb-2">HOLD</div>
@@ -390,7 +390,7 @@ export default function SprintTetris({ onBack }: Props) {
           </div>
 
           {/* 操作説明 */}
-          <div className="bg-gray-900 rounded-lg p-3 border border-gray-700 text-xs text-gray-400 space-y-1 min-w-[180px]">
+          <div className="bg-gray-900 rounded-lg p-3 border border-gray-700 text-xs text-gray-400 space-y-1 hidden lg:block min-w-[120px]">
             <div className="font-semibold text-gray-300 mb-1">操作</div>
             <div>← → 移動</div>
             <div>Space 回転</div>
