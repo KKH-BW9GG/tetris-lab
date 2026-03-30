@@ -239,6 +239,7 @@ export function useSprintTetris() {
       if (e.key === 'p' || e.key === 'P') {
         if (!gameOverRef.current && !finishedRef.current && !waitingRef.current) {
           pausedRef.current = !pausedRef.current
+    if (pausedRef.current) setSoftDrop(false)
           setState(prev => ({ ...prev, paused: !prev.paused }))
         }
         return
@@ -346,7 +347,7 @@ export function useSprintTetris() {
       window.removeEventListener('keyup', onKeyUp)
       window.removeEventListener('blur', onBlur)
     }
-  }, [stopTimer, hold])
+  }, [stopTimer, startTimer, hold])
 
   // -------------------------------------------------------
   // クリーンアップ
@@ -374,6 +375,7 @@ export function useSprintTetris() {
   const togglePause = useCallback(() => {
     if (gameOverRef.current || finishedRef.current || waitingRef.current) return
     pausedRef.current = !pausedRef.current
+    if (pausedRef.current) setSoftDrop(false)
     setState(prev => ({ ...prev, paused: !prev.paused }))
   }, [])
 
@@ -389,7 +391,7 @@ export function useSprintTetris() {
   }, [startTimer])
 
   const moveLeft = useCallback(() => {
-    if (gameOverRef.current || finishedRef.current) return
+    if (gameOverRef.current || finishedRef.current || pausedRef.current) return
     activateIfWaiting()
     setState(prev => {
       if (!prev.piece || prev.gameOver || prev.finished) return prev
@@ -401,7 +403,7 @@ export function useSprintTetris() {
   }, [activateIfWaiting])
 
   const moveRight = useCallback(() => {
-    if (gameOverRef.current || finishedRef.current) return
+    if (gameOverRef.current || finishedRef.current || pausedRef.current) return
     activateIfWaiting()
     setState(prev => {
       if (!prev.piece || prev.gameOver || prev.finished) return prev
@@ -413,7 +415,7 @@ export function useSprintTetris() {
   }, [activateIfWaiting])
 
   const rotate = useCallback(() => {
-    if (gameOverRef.current || finishedRef.current) return
+    if (gameOverRef.current || finishedRef.current || pausedRef.current) return
     activateIfWaiting()
     setState(prev => {
       if (!prev.piece || prev.gameOver || prev.finished) return prev
@@ -425,7 +427,7 @@ export function useSprintTetris() {
   }, [activateIfWaiting])
 
   const hardDrop = useCallback(() => {
-    if (gameOverRef.current || finishedRef.current) return
+    if (gameOverRef.current || finishedRef.current || pausedRef.current) return
     activateIfWaiting()
     setState(prev => {
       if (!prev.piece || prev.gameOver || prev.finished) return prev
@@ -479,7 +481,7 @@ export function useSprintTetris() {
       soundGameOver()
       return { ...prev, board: cleared, piece: null, lines: newLines, gameOver: true, flashingRows: fullLines }
     })
-  }, [stopTimer])
+  }, [stopTimer, activateIfWaiting])
 
   const softDropStart = useCallback(() => setSoftDrop(true), [])
   const softDropEnd = useCallback(() => setSoftDrop(false), [])

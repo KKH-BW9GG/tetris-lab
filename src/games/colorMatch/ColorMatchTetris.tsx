@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect } from 'react'
 import { useColorMatchTetris } from './useColorMatchTetris'
 import { useDAS } from '../../shared/useDAS'
 import { useCellSize } from '../../shared/useCellSize'
@@ -126,17 +126,6 @@ export default function ColorMatchTetris({ onBack }: Props) {
   const cellSize = useCellSize()
 
   const [showLeaderboard, setShowLeaderboard] = useState(false)
-  const [scoreHighlight, setScoreHighlight] = useState(false)
-  const prevScoreRef = useRef(score)
-
-  useEffect(() => {
-    if (score !== prevScoreRef.current) {
-      prevScoreRef.current = score
-      setScoreHighlight(true)
-      const t = setTimeout(() => setScoreHighlight(false), 300)
-      return () => clearTimeout(t)
-    }
-  }, [score])
 
   useEffect(() => {
     startBGM('colorMatch')
@@ -263,8 +252,8 @@ export default function ColorMatchTetris({ onBack }: Props) {
           <div className="bg-gray-900 border border-gray-700 rounded p-3 min-w-[70px]">
             <p className="text-gray-400 text-xs uppercase tracking-wider mb-1">Score</p>
             <p
-              className={`text-xl font-bold tabular-nums transition-colors duration-150 ${scoreHighlight ? 'text-white' : 'text-yellow-400'}`}
-              style={scoreHighlight ? { textShadow: '0 0 12px rgba(255,255,255,0.9)' } : undefined}
+              key={score}
+              className="score-highlight text-xl font-bold tabular-nums text-yellow-400"
             >
               {score.toLocaleString()}
             </p>

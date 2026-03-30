@@ -237,13 +237,16 @@ export default function SprintTetris({ onBack }: Props) {
 
   const ghostPiece = state.piece ? getGhostPiece(state.board, state.piece) : null
 
-  // 達成時にリーダーボード判定（一度だけ）
-  if (state.finished && !leaderboardShown && !showLeaderboard) {
-    if (isTopTime('sprint', state.elapsedMs)) {
-      setShowLeaderboard(true)
-    }
-    setLeaderboardShown(true)
-  }
+  useEffect(() => {
+    if (!state.finished || leaderboardShown) return
+    const id = setTimeout(() => {
+      if (isTopTime('sprint', state.elapsedMs)) {
+        setShowLeaderboard(true)
+      }
+      setLeaderboardShown(true)
+    }, 0)
+    return () => clearTimeout(id)
+  }, [state.finished, state.elapsedMs, leaderboardShown])
 
   const handleRestart = () => {
     setShowLeaderboard(false)

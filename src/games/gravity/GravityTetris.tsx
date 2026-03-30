@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect } from 'react'
 import { useGravityTetris, FLIP_ANIM_MS } from './useGravityTetris'
 import { useDAS } from '../../shared/useDAS'
 import { BOARD_COLS, BOARD_ROWS } from '../../shared/tetrominos'
@@ -193,8 +193,6 @@ export default function GravityTetris({ onBack }: Props) {
   useDAS(moveLeft, moveRight)
   const cellSize = useCellSize()
   const [showLeaderboard, setShowLeaderboard] = useState(false)
-  const [scoreHighlight, setScoreHighlight] = useState(false)
-  const prevScoreRef = useRef(state.score)
 
   useEffect(() => {
     startBGM('gravity')
@@ -204,15 +202,6 @@ export default function GravityTetris({ onBack }: Props) {
   useEffect(() => {
     if (state.gameOver) stopBGM()
   }, [state.gameOver])
-
-  useEffect(() => {
-    if (state.score !== prevScoreRef.current) {
-      prevScoreRef.current = state.score
-      setScoreHighlight(true)
-      const t = setTimeout(() => setScoreHighlight(false), 300)
-      return () => clearTimeout(t)
-    }
-  }, [state.score])
 
   const flipLabel = state.gravity === 'down' ? '↓ 通常重力' : '↑ 反転重力'
 
@@ -346,10 +335,8 @@ export default function GravityTetris({ onBack }: Props) {
           <div className="bg-gray-900 rounded-lg p-1.5 border border-gray-700 text-center min-w-[70px]">
             <div className="text-xs text-gray-400 mb-1">スコア</div>
             <div
-              className={`text-lg font-bold tabular-nums transition-colors duration-150 ${
-                scoreHighlight ? 'text-white' : 'text-yellow-400'
-              }`}
-              style={scoreHighlight ? { textShadow: '0 0 12px rgba(255,255,255,0.9)' } : undefined}
+              key={state.score}
+              className="score-highlight text-lg font-bold tabular-nums text-yellow-400"
             >
               {state.score.toLocaleString()}
             </div>

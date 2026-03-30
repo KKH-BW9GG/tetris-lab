@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, type CSSProperties } from 'react'
+import { useState, useEffect, type CSSProperties } from 'react'
 import { BOARD_COLS, BOARD_ROWS } from '../../shared/tetrominos'
 import { useCellSize } from '../../shared/useCellSize'
 import type { Cell } from '../../shared/types'
@@ -98,17 +98,6 @@ export default function SlimeTetris({ onBack }: Props) {
   const cellSize = useCellSize()
   const { board, gameOver, score, lines, isCurrentSlime, isSlimeFalling, isTopScore, paused, flashingRows, nextPiece, waiting, heldPiece, canHold } = state
   const [showLeaderboard, setShowLeaderboard] = useState(false)
-  const [scoreHighlight, setScoreHighlight] = useState(false)
-  const prevScoreRef = useRef(score)
-
-  useEffect(() => {
-    if (score !== prevScoreRef.current) {
-      prevScoreRef.current = score
-      setScoreHighlight(true)
-      const t = setTimeout(() => setScoreHighlight(false), 300)
-      return () => clearTimeout(t)
-    }
-  }, [score])
 
   useEffect(() => {
     startBGM('slime')
@@ -256,8 +245,8 @@ export default function SlimeTetris({ onBack }: Props) {
           <div className="bg-gray-900 border border-gray-700 rounded-lg p-3 min-w-[70px]">
             <p className="text-gray-400 text-xs uppercase tracking-wider mb-1">Score</p>
             <p
-              className={`text-lg font-bold tabular-nums transition-colors duration-150 ${scoreHighlight ? 'text-white' : 'text-yellow-400'}`}
-              style={scoreHighlight ? { textShadow: '0 0 12px rgba(255,255,255,0.9)' } : undefined}
+              key={score}
+              className="score-highlight text-lg font-bold tabular-nums text-yellow-400"
             >
               {score.toLocaleString()}
             </p>

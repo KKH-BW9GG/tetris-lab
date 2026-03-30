@@ -263,65 +263,62 @@ export function useColorMatchTetris() {
   // 連鎖消去処理
   // ---------------------------------------------------------------
 
-  const processClear = useCallback(
-    (
-      board: Board,
-      chainCount: number,
-    ): Promise<{ board: Board; score: number; chain: number }> => {
-      return new Promise((resolve) => {
-        const fullLines = getFullLines(board);
-        const colorCells = getColorMatchCells(board);
+  const processClear = useCallback(function processClear(
+    board: Board,
+    chainCount: number,
+  ): Promise<{ board: Board; score: number; chain: number }> {
+    return new Promise((resolve) => {
+      const fullLines = getFullLines(board);
+      const colorCells = getColorMatchCells(board);
 
-        // 消去対象: ライン + 色マッチを元のボード座標で一括マーク
-        const cellsToRemove = new Set<string>([...colorCells]);
-        fullLines.forEach((r) => {
-          for (let c = 0; c < BOARD_COLS; c++) {
-            cellsToRemove.add(`${r},${c}`);
-          }
-        });
-
-        if (cellsToRemove.size === 0) {
-          resolve({ board, score: 0, chain: chainCount });
-          return;
+      // 消去対象: ライン + 色マッチを元のボード座標で一括マーク
+      const cellsToRemove = new Set<string>([...colorCells]);
+      fullLines.forEach((r) => {
+        for (let c = 0; c < BOARD_COLS; c++) {
+          cellsToRemove.add(`${r},${c}`);
         }
-
-        const earned = calcScore(fullLines.length, colorCells.size, chainCount);
-
-        // サウンド
-        if (chainCount > 0) soundChain(chainCount);
-        else if (fullLines.length === 4) soundTetris();
-        else if (fullLines.length > 1) soundClearMulti(fullLines.length);
-        else if (fullLines.length === 1) soundClear1();
-        else if (colorCells.size >= 4)
-          soundClearMulti(Math.floor(colorCells.size / 4));
-
-        setState((prev) => ({
-          ...prev,
-          flashCells: cellsToRemove,
-          isClearing: true,
-          chain: chainCount,
-        }));
-        isClearingRef.current = true;
-
-        setTimeout(() => {
-          // 元のボードからまとめて削除し、重力を適用
-          let next = removeCells(board, cellsToRemove);
-          next = applyGravity(next);
-
-          setState((prev) => ({ ...prev, board: next, flashCells: new Set() }));
-
-          processClear(next, chainCount + 1).then((result) => {
-            resolve({
-              board: result.board,
-              score: earned + result.score,
-              chain: result.chain,
-            });
-          });
-        }, 200);
       });
-    },
-    [],
-  );
+
+      if (cellsToRemove.size === 0) {
+        resolve({ board, score: 0, chain: chainCount });
+        return;
+      }
+
+      const earned = calcScore(fullLines.length, colorCells.size, chainCount);
+
+      // サウンド
+      if (chainCount > 0) soundChain(chainCount);
+      else if (fullLines.length === 4) soundTetris();
+      else if (fullLines.length > 1) soundClearMulti(fullLines.length);
+      else if (fullLines.length === 1) soundClear1();
+      else if (colorCells.size >= 4)
+        soundClearMulti(Math.floor(colorCells.size / 4));
+
+      setState((prev) => ({
+        ...prev,
+        flashCells: cellsToRemove,
+        isClearing: true,
+        chain: chainCount,
+      }));
+      isClearingRef.current = true;
+
+      setTimeout(() => {
+        // 元のボードからまとめて削除し、重力を適用
+        let next = removeCells(board, cellsToRemove);
+        next = applyGravity(next);
+
+        setState((prev) => ({ ...prev, board: next, flashCells: new Set() }));
+
+        processClear(next, chainCount + 1).then((result) => {
+          resolve({
+            board: result.board,
+            score: earned + result.score,
+            chain: result.chain,
+          });
+        });
+      }, 200);
+    });
+  }, []);
 
   // ---------------------------------------------------------------
   // ピース設置
@@ -489,7 +486,7 @@ export function useColorMatchTetris() {
       if (waitingRef.current) {
         waitingRef.current = false;
         setState((prev) => ({ ...prev, waiting: false }));
-        return;
+        if (e.key === " ") return;
       }
       if (gameOverRef.current || isClearingRef.current || pausedRef.current)
         return;
@@ -603,6 +600,7 @@ export function useColorMatchTetris() {
   const togglePause = useCallback(() => {
     if (gameOverRef.current) return;
     pausedRef.current = !pausedRef.current;
+    if (pausedRef.current) setSoftDrop(false);
     setState((prev) => ({ ...prev, paused: !prev.paused }));
   }, []);
 

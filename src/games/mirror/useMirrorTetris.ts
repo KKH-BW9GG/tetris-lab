@@ -265,6 +265,7 @@ export function useMirrorTetris() {
       if (e.key === 'p' || e.key === 'P') {
         if (!gameOverRef.current) {
           pausedRef.current = !pausedRef.current
+    if (pausedRef.current) setSoftDrop(false)
           setState(prev => ({ ...prev, paused: !prev.paused }))
         }
         return
@@ -272,7 +273,7 @@ export function useMirrorTetris() {
       if (waitingRef.current) {
         waitingRef.current = false
         setState(prev => ({ ...prev, waiting: false }))
-        return
+        if (e.key === ' ') return
       }
       if (gameOverRef.current || pausedRef.current) return
       if ([' ', 'ArrowUp', 'ArrowDown'].includes(e.key)) {
@@ -401,6 +402,7 @@ export function useMirrorTetris() {
   const togglePause = useCallback(() => {
     if (gameOverRef.current) return
     pausedRef.current = !pausedRef.current
+    if (pausedRef.current) setSoftDrop(false)
     setState(prev => ({ ...prev, paused: !prev.paused }))
   }, [])
 

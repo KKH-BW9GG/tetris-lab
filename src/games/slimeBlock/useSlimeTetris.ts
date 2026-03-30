@@ -284,7 +284,7 @@ export function useSlimeTetris() {
     if (waitingRef.current) {
       waitingRef.current = false
       setWaiting(false)
-      return
+      if (e.key === ' ') return
     }
     if (gameOverRef.current || isSlimeFallingRef.current || pausedRef.current) return
     const piece = currentPieceRef.current
@@ -397,7 +397,7 @@ export function useSlimeTetris() {
 
   // ---- touch action handlers ----
   const moveLeft = useCallback(() => {
-    if (gameOverRef.current || isSlimeFallingRef.current || waitingRef.current) return
+    if (gameOverRef.current || isSlimeFallingRef.current || pausedRef.current || waitingRef.current) return
     const piece = currentPieceRef.current
     if (!piece) return
     const moved: SlimePiece = { ...piece, x: piece.x - 1 }
@@ -405,7 +405,7 @@ export function useSlimeTetris() {
   }, [])
 
   const moveRight = useCallback(() => {
-    if (gameOverRef.current || isSlimeFallingRef.current || waitingRef.current) return
+    if (gameOverRef.current || isSlimeFallingRef.current || pausedRef.current || waitingRef.current) return
     const piece = currentPieceRef.current
     if (!piece) return
     const moved: SlimePiece = { ...piece, x: piece.x + 1 }
@@ -413,7 +413,7 @@ export function useSlimeTetris() {
   }, [])
 
   const rotate = useCallback(() => {
-    if (gameOverRef.current || isSlimeFallingRef.current || waitingRef.current) return
+    if (gameOverRef.current || isSlimeFallingRef.current || pausedRef.current || waitingRef.current) return
     const piece = currentPieceRef.current
     if (!piece) return
     const rotated: SlimePiece = { ...piece, shape: rotateCW(piece.shape) }
@@ -421,7 +421,7 @@ export function useSlimeTetris() {
   }, [])
 
   const hardDrop = useCallback(() => {
-    if (gameOverRef.current || isSlimeFallingRef.current || waitingRef.current) return
+    if (gameOverRef.current || isSlimeFallingRef.current || pausedRef.current || waitingRef.current) return
     const piece = currentPieceRef.current
     if (!piece) return
     let dropped: SlimePiece = { ...piece }
@@ -434,7 +434,7 @@ export function useSlimeTetris() {
 
   const softDropStart = useCallback(() => {
     // slime tetris uses setInterval-based auto-fall; we trigger a single step
-    if (gameOverRef.current || isSlimeFallingRef.current || waitingRef.current) return
+    if (gameOverRef.current || isSlimeFallingRef.current || pausedRef.current || waitingRef.current) return
     const piece = currentPieceRef.current
     if (!piece) return
     const moved: SlimePiece = { ...piece, y: piece.y + 1 }

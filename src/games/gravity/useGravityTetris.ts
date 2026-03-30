@@ -151,8 +151,6 @@ export function useGravityTetris() {
   const gameOverRef = useRef(false);
   const isFlippingRef = useRef(false);
   const flipGenRef = useRef(0);
-  const holdRef = useRef<() => void>(() => {});
-
   // -------------------------------------------------------
   // dropTick
   // -------------------------------------------------------
@@ -224,6 +222,7 @@ export function useGravityTetris() {
       if (
         !prev.piece ||
         !prev.canHold ||
+        prev.isFlipping ||
         prev.gameOver ||
         prev.paused ||
         prev.waiting
@@ -254,7 +253,6 @@ export function useGravityTetris() {
       };
     });
   }, []);
-  holdRef.current = hold;
 
   // -------------------------------------------------------
   // flipGravity
@@ -300,7 +298,13 @@ export function useGravityTetris() {
         // スポーン前に天井チェック
         if (isCeilingReached(prev.board, prev.gravity)) {
           gameOverRef.current = true;
-          return { ...prev, piece: null, isFlipping: false, gameOver: true };
+          return {
+            ...prev,
+            piece: null,
+            isFlipping: false,
+            gameOver: true,
+            isTopScore: isTopScore("gravity", prev.score),
+          };
         }
         const spawnPiece = prev.nextPiece;
         const newNextPiece = createPiece(prev.gravity);
@@ -313,7 +317,13 @@ export function useGravityTetris() {
           };
         }
         gameOverRef.current = true;
-        return { ...prev, piece: null, isFlipping: false, gameOver: true };
+        return {
+          ...prev,
+          piece: null,
+          isFlipping: false,
+          gameOver: true,
+          isTopScore: isTopScore("gravity", prev.score),
+        };
       });
     }, FLIP_ANIM_MS);
   }, []);
@@ -360,7 +370,10 @@ export function useGravityTetris() {
       !state.paused &&
       !state.waiting
     ) {
-      flipGravity();
+      const id = setTimeout(() => {
+        flipGravity();
+      }, 0);
+      return () => clearTimeout(id);
     }
   }, [
     state.flipCountdown,
@@ -396,7 +409,7 @@ export function useGravityTetris() {
       if (waitingRef.current) {
         waitingRef.current = false;
         setState((prev) => ({ ...prev, waiting: false }));
-        return;
+        if (e.key === " ") return;
       }
       if (gameOverRef.current || isFlippingRef.current || pausedRef.current)
         return;
@@ -419,7 +432,7 @@ export function useGravityTetris() {
       }
 
       if (e.key === "Shift") {
-        holdRef.current();
+        hold();
         return;
       }
 
@@ -498,7 +511,7 @@ export function useGravityTetris() {
       window.removeEventListener("keyup", onKeyUp);
       window.removeEventListener("blur", onBlur);
     };
-  }, []);
+  }, [hold]);
 
   // Keep pausedRef in sync
   useEffect(() => {
@@ -546,6 +559,7 @@ export function useGravityTetris() {
   const togglePause = useCallback(() => {
     if (gameOverRef.current) return;
     pausedRef.current = !pausedRef.current;
+    if (pausedRef.current) setSoftDrop(false);
     setState((prev) => ({ ...prev, paused: !prev.paused }));
   }, []);
 
