@@ -44,6 +44,7 @@ export default function LeaderboardModal({ gameId, score, isTime = false, onClos
         display: 'flex', alignItems: 'center', justifyContent: 'center',
         zIndex: 9999,
         backdropFilter: 'blur(4px)',
+        padding: '16px',
       }}
     >
       <div
@@ -54,13 +55,15 @@ export default function LeaderboardModal({ gameId, score, isTime = false, onClos
           borderColor: '#6366f1',
           borderRadius: 20,
           padding: '28px 32px',
-          minWidth: 288,
+          width: 'min(340px, calc(100vw - 32px))',
           maxWidth: 340,
           textAlign: 'center',
           color: '#fff',
           boxShadow: '0 0 40px rgba(99,102,241,0.4), 0 20px 60px rgba(0,0,0,0.7)',
           position: 'relative',
           overflow: 'hidden',
+          maxHeight: 'min(640px, calc(100dvh - 32px))',
+          overflowY: 'auto',
         }}
       >
         {/* 背景グロー */}
@@ -102,7 +105,7 @@ export default function LeaderboardModal({ gameId, score, isTime = false, onClos
                 width: '100%', padding: '10px 14px',
                 background: '#1f2937',
                 border: '2px solid #4b5563',
-                borderRadius: 10, color: '#fff', fontSize: 20,
+                borderRadius: 10, color: '#fff', fontSize: 16,
                 textAlign: 'center', letterSpacing: '0.15em',
                 marginBottom: 14, boxSizing: 'border-box',
                 outline: 'none',

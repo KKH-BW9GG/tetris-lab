@@ -26,6 +26,13 @@ body {
   box-sizing: border-box;
 }
 
+button:focus-visible,
+a:focus-visible,
+input:focus-visible {
+  outline: 2px solid rgba(103, 232, 249, 0.95);
+  outline-offset: 3px;
+}
+
 .h-dvh {
   height: 100dvh;
 }
@@ -157,6 +164,22 @@ body {
   transform: translateY(0) scale(0.98);
 }
 
+.game-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(120deg, transparent 0%, rgba(255,255,255,0.16) 35%, transparent 70%);
+  opacity: 0;
+  transform: translateX(-120%);
+  transition: transform 0.45s ease, opacity 0.2s ease;
+}
+
+.game-card:hover::after,
+.game-card:focus-visible::after {
+  opacity: 1;
+  transform: translateX(120%);
+}
+
 /* ================================================================
    TOUCH BUTTON PRESS FEEDBACK
    ================================================================ */
@@ -167,6 +190,17 @@ body {
 
 .touch-btn:active {
   transform: scale(0.88);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }
 
 /* ================================================================

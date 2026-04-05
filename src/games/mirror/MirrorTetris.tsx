@@ -8,6 +8,9 @@ import TouchControls from '../../shared/TouchControls'
 import LeaderboardModal, { WeeklyTable } from '../../shared/LeaderboardModal'
 import { getWeeklyScores } from '../../shared/leaderboard'
 import { startBGM, stopBGM } from '../../shared/sound'
+import TutorialOverlay from '../../shared/TutorialOverlay'
+import { formatPersonalBest, getPersonalBest, recordPersonalBest } from '../../shared/personalBests'
+import { useTutorial } from '../../shared/useTutorial'
 
 interface Props {
   onBack: () => void
@@ -205,11 +208,14 @@ function NextPiecePreview({ piece }: { piece: Piece }) {
 }
 
 export default function MirrorTetris({ onBack }: Props) {
-  const { state, ghostPiece, start, moveLeft, moveRight, rotate, hardDrop, softDropStart, softDropEnd, togglePause } =
+  const { state, ghostPiece, start, startIfWaiting, moveLeft, moveRight, rotate, hardDrop, softDropStart, softDropEnd, togglePause } =
     useMirrorTetris()
   useDAS(moveLeft, moveRight)
   const cellSize = useCellSize()
   const [showLeaderboard, setShowLeaderboard] = useState(false)
+  const [personalBest, setPersonalBest] = useState(() => getPersonalBest('mirror'))
+  const [bestImproved, setBestImproved] = useState(false)
+  const tutorial = useTutorial('mirror')
 
   useEffect(() => {
     startBGM('mirror')
@@ -220,10 +226,20 @@ export default function MirrorTetris({ onBack }: Props) {
     if (state.gameOver) stopBGM()
   }, [state.gameOver])
 
+  useEffect(() => {
+    if (!state.gameOver) return
+    const result = recordPersonalBest('mirror', state.score)
+    const id = setTimeout(() => {
+      setPersonalBest(result.best)
+      setBestImproved(result.improved)
+    }, 0)
+    return () => clearTimeout(id)
+  }, [state.gameOver, state.score])
+
   return (
     <div className="min-h-screen bg-gray-950 text-white flex flex-col items-center justify-start gap-2 py-4 overflow-y-auto">
       {/* ヘッダー */}
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-3">
         <button
           onClick={onBack}
           className="px-3 py-1 rounded bg-gray-700 hover:bg-gray-600 text-sm transition-colors"
@@ -231,6 +247,12 @@ export default function MirrorTetris({ onBack }: Props) {
           ← 戻る
         </button>
         <h1 className="text-2xl font-bold text-purple-400">ミラーテトリス</h1>
+        <button
+          onClick={tutorial.reopen}
+          className="rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-xs font-semibold text-white/70 transition-colors hover:bg-white/10 hover:text-white"
+        >
+          ?
+        </button>
         {!state.gameOver && (
           <button
             onClick={togglePause}
@@ -255,7 +277,7 @@ export default function MirrorTetris({ onBack }: Props) {
         {/* READY オーバーレイ */}
         {state.waiting && (
           <div className="absolute inset-0 flex flex-col items-center justify-center gap-3"
-            style={{ background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(2px)' }} onPointerDown={() => window.dispatchEvent(new KeyboardEvent("keydown", { key: " " }))}>
+            style={{ background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(2px)' }} onPointerDown={startIfWaiting}>
             <span className="text-5xl font-black text-purple-300 animate-pulse tracking-widest">READY</span>
             <span className="text-gray-400 text-sm">Tap to start</span>
           </div>
@@ -308,6 +330,13 @@ export default function MirrorTetris({ onBack }: Props) {
             <div className="text-xs text-gray-400 mb-1">レベル</div>
             <div className="text-xl font-bold tabular-nums text-purple-300">
               {state.level}
+            </div>
+          </div>
+
+          <div className="bg-gray-900 rounded-lg p-1.5 border border-white/10 text-center min-w-[70px]">
+            <div className="text-xs text-gray-400 mb-1">BEST</div>
+            <div className="text-base font-black tabular-nums text-white">
+              {formatPersonalBest('mirror', personalBest)}
             </div>
           </div>
 
@@ -392,6 +421,11 @@ export default function MirrorTetris({ onBack }: Props) {
               </span>
             </div>
             <div className="text-sm text-gray-400">ライン消去: {state.lines} / レベル: {state.level}</div>
+            {bestImproved && (
+              <div className="rounded-full border border-purple-300/35 bg-purple-300/12 px-3 py-1 text-xs font-black tracking-[0.18em] text-purple-200 uppercase">
+                New Personal Best
+              </div>
+            )}
             <WeeklyTable entries={getWeeklyScores('mirror')} />
             <button
               onClick={start}
@@ -407,6 +441,30 @@ export default function MirrorTetris({ onBack }: Props) {
             </button>
           </div>
         </div>
+      )}
+
+      {tutorial.visible && (
+        <TutorialOverlay
+          accentClassName="text-purple-300"
+          title="Mirror Mode"
+          subtitle="操作ピースと左右反転ピースが同時に落ちます。中央の余白を読みながら、両側をまとめて管理するモードです。"
+          bullets={[
+            '左右対称の2ピースを同時に操作',
+            'どちらか片方でも衝突すると移動できない',
+            '中央付近の詰まりが一気に危険になる',
+          ]}
+          controls={[
+            '← → で両側が逆向きに移動',
+            'Space 回転 / ↑ ハードドロップ',
+            'P ポーズ',
+          ]}
+          actionLabel={state.waiting ? '閉じて開始' : '閉じる'}
+          onAction={() => {
+            tutorial.dismiss()
+            if (state.waiting) startIfWaiting()
+          }}
+          onClose={tutorial.dismiss}
+        />
       )}
     </div>
   )

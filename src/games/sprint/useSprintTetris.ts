@@ -490,6 +490,7 @@ export function useSprintTetris() {
     state,
     getGhostPiece,
     start,
+    startIfWaiting: activateIfWaiting,
     moveLeft,
     moveRight,
     rotate,

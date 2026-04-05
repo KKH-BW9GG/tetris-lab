@@ -8,6 +8,9 @@ import TouchControls from '../../shared/TouchControls'
 import LeaderboardModal, { WeeklyTable } from '../../shared/LeaderboardModal'
 import { getWeeklyScores } from '../../shared/leaderboard'
 import { startBGM, stopBGM } from '../../shared/sound'
+import TutorialOverlay from '../../shared/TutorialOverlay'
+import { formatPersonalBest, getPersonalBest, recordPersonalBest } from '../../shared/personalBests'
+import { useTutorial } from '../../shared/useTutorial'
 
 interface Props {
   onBack: () => void
@@ -93,11 +96,14 @@ function HoldPiecePreview({ piece }: { piece: { shape: number[][], color: string
 }
 
 export default function SlimeTetris({ onBack }: Props) {
-  const { state, ghostPiece, restart, moveLeft, moveRight, rotate, hardDrop, softDropStart, softDropEnd, togglePause, hold } = useSlimeTetris()
+  const { state, ghostPiece, restart, startIfWaiting, moveLeft, moveRight, rotate, hardDrop, softDropStart, softDropEnd, togglePause, hold } = useSlimeTetris()
   useDAS(moveLeft, moveRight)
   const cellSize = useCellSize()
   const { board, gameOver, score, lines, isCurrentSlime, isSlimeFalling, isTopScore, paused, flashingRows, nextPiece, waiting, heldPiece, canHold } = state
   const [showLeaderboard, setShowLeaderboard] = useState(false)
+  const [personalBest, setPersonalBest] = useState(() => getPersonalBest('slime'))
+  const [bestImproved, setBestImproved] = useState(false)
+  const tutorial = useTutorial('slime')
 
   useEffect(() => {
     startBGM('slime')
@@ -108,13 +114,23 @@ export default function SlimeTetris({ onBack }: Props) {
     if (gameOver) stopBGM()
   }, [gameOver])
 
+  useEffect(() => {
+    if (!gameOver) return
+    const result = recordPersonalBest('slime', score)
+    const id = setTimeout(() => {
+      setPersonalBest(result.best)
+      setBestImproved(result.improved)
+    }, 0)
+    return () => clearTimeout(id)
+  }, [gameOver, score])
+
   const boardWidth = BOARD_COLS * cellSize
   const boardHeight = BOARD_ROWS * cellSize
 
   return (
     <div className="min-h-screen bg-gray-950 flex flex-col items-center justify-start p-4 overflow-y-auto select-none">
       {/* Header */}
-      <div className="flex items-center gap-4 mb-4">
+      <div className="flex items-center gap-3 mb-4">
         <button
           onClick={onBack}
           className="text-gray-400 hover:text-white transition-colors text-sm"
@@ -124,6 +140,12 @@ export default function SlimeTetris({ onBack }: Props) {
         <h1 className="text-2xl font-bold text-emerald-400">
           Slime &times; Block Tetris
         </h1>
+        <button
+          onClick={tutorial.reopen}
+          className="rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-xs font-semibold text-white/70 transition-colors hover:bg-white/10 hover:text-white"
+        >
+          ?
+        </button>
         {!gameOver && (
           <button
             onClick={togglePause}
@@ -194,7 +216,7 @@ export default function SlimeTetris({ onBack }: Props) {
           {/* READY overlay */}
           {waiting && (
             <div className="absolute inset-0 flex flex-col items-center justify-center gap-3"
-              style={{ background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(2px)' }} onPointerDown={() => window.dispatchEvent(new KeyboardEvent("keydown", { key: " " }))}>
+              style={{ background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(2px)' }} onPointerDown={startIfWaiting}>
               <span className="text-5xl font-black text-emerald-300 animate-pulse tracking-widest">READY</span>
               <span className="text-gray-400 text-sm">Tap to start</span>
             </div>
@@ -222,6 +244,11 @@ export default function SlimeTetris({ onBack }: Props) {
               <p className="text-2xl font-bold game-over-text">GAME OVER</p>
               <p className="text-white text-lg">Score: {score}</p>
               <p className="text-gray-400 text-sm">Lines: {lines}</p>
+              {bestImproved && (
+                <div className="rounded-full border border-emerald-300/35 bg-emerald-300/12 px-3 py-1 text-xs font-black tracking-[0.18em] text-emerald-200 uppercase">
+                  New Personal Best
+                </div>
+              )}
               <WeeklyTable entries={getWeeklyScores('slime')} />
               <button
                 onClick={restart}
@@ -249,6 +276,13 @@ export default function SlimeTetris({ onBack }: Props) {
               className="score-highlight text-lg font-bold tabular-nums text-yellow-400"
             >
               {score.toLocaleString()}
+            </p>
+          </div>
+
+          <div className="bg-gray-900 border border-white/10 rounded-lg p-3 min-w-[70px]">
+            <p className="text-gray-400 text-xs uppercase tracking-wider mb-1">Best</p>
+            <p className="text-lg font-bold tabular-nums text-white">
+              {formatPersonalBest('slime', personalBest)}
             </p>
           </div>
 
@@ -342,6 +376,30 @@ export default function SlimeTetris({ onBack }: Props) {
           onRotate={rotate}
           onHardDrop={hardDrop}
           onHold={hold}
+        />
+      )}
+
+      {tutorial.visible && (
+        <TutorialOverlay
+          accentClassName="text-emerald-300"
+          title="Slime × Block"
+          subtitle="スライムは固定後に下へ流れます。置いた瞬間だけでなく、落ち切った後の地形まで読むモードです。"
+          bullets={[
+            '通常ブロックとスライムが混在',
+            'スライムは固定後に空きへ流れ落ちる',
+            '落下後にラインがそろう形を狙える',
+          ]}
+          controls={[
+            '← → 移動 / Space 回転',
+            '↑ ハードドロップ / ↓ ソフトドロップ',
+            'Shift ホールド / P ポーズ',
+          ]}
+          actionLabel={waiting ? '閉じて開始' : '閉じる'}
+          onAction={() => {
+            tutorial.dismiss()
+            if (waiting) startIfWaiting()
+          }}
+          onClose={tutorial.dismiss}
         />
       )}
     </div>

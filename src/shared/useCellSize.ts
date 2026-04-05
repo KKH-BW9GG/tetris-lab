@@ -10,26 +10,32 @@ export function useCellSize(): number {
   useEffect(() => {
     const onResize = () => setCellSize(calcCellSize());
     window.addEventListener("resize", onResize);
-    return () => window.removeEventListener("resize", onResize);
+    window.addEventListener("orientationchange", onResize);
+    window.visualViewport?.addEventListener("resize", onResize);
+    return () => {
+      window.removeEventListener("resize", onResize);
+      window.removeEventListener("orientationchange", onResize);
+      window.visualViewport?.removeEventListener("resize", onResize);
+    };
   }, []);
   return cellSize;
 }
 
 function calcCellSize(): number {
-  const vw = window.innerWidth;
-  const vh = window.innerHeight;
-
-  // Horizontal: board needs BOARD_COLS cells + outer margin (48px total for breathing room)
-  const maxByWidth = Math.floor((vw - 48) / BOARD_COLS);
-
-  // Vertical budget: header(48) + board + sidebar(compact ~100) + touch controls(140) + gaps(40)
-  // On small screens, sidebar wraps below board so we must account for it
+  const vw = window.visualViewport?.width ?? window.innerWidth;
+  const vh = window.visualViewport?.height ?? window.innerHeight;
+  const shortestSide = Math.min(vw, vh);
   const isMobile = vw < 768;
+  const isPortrait = vh >= vw;
+  const isTablet = shortestSide >= 700;
+
+  const horizontalPadding = isMobile ? 24 : 56;
+  const maxByWidth = Math.floor((vw - horizontalPadding) / BOARD_COLS);
+
   const reservedHeight = isMobile
-    ? 48 + 100 + 140 + 40 // header + sidebar + touch + gaps
-    : 48 + 60; // header + padding only (sidebar is beside board)
+    ? (isPortrait ? 280 : 180)
+    : (isTablet ? 120 : 100);
   const maxByHeight = Math.floor((vh - reservedHeight) / BOARD_ROWS);
 
-  // Clamp between 12px (tiny phone) and 30px (desktop)
-  return Math.max(12, Math.min(30, maxByWidth, maxByHeight));
+  return Math.max(12, Math.min(isTablet ? 34 : 30, maxByWidth, maxByHeight));
 }

@@ -406,6 +406,12 @@ export function useMirrorTetris() {
     setState(prev => ({ ...prev, paused: !prev.paused }))
   }, [])
 
+  const startIfWaiting = useCallback(() => {
+    if (!waitingRef.current) return
+    waitingRef.current = false
+    setState(prev => ({ ...prev, waiting: false }))
+  }, [])
+
   // ゴーストピース（メインピースのみ）
   const ghostPiece = state.piece
     ? (() => {
@@ -417,5 +423,5 @@ export function useMirrorTetris() {
       })()
     : null
 
-  return { state, ghostPiece, start, moveLeft, moveRight, rotate, hardDrop, softDropStart, softDropEnd, togglePause }
+  return { state, ghostPiece, start, startIfWaiting, moveLeft, moveRight, rotate, hardDrop, softDropStart, softDropEnd, togglePause }
 }

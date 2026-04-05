@@ -93,6 +93,8 @@ export async function saveTime(gameId: string, name: string, timeMs: number): Pr
     .slice(0, TOP_N)
   try {
     localStorage.setItem(getWeekKey(gameId), JSON.stringify(updated))
-  } catch {}
+  } catch {
+    // localStorage 失敗は無視
+  }
   return updated
 }

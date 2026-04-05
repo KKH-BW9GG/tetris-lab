@@ -1,3 +1,5 @@
+import { getPreferences } from './preferences'
+
 /**
  * Web Audio API を使ったサウンドエフェクト
  * 外部ファイル不要、オシレーターベースで生成
@@ -13,6 +15,14 @@ function getCtx(): AudioContext {
     ctx.resume().catch(() => {})
   }
   return ctx
+}
+
+function canPlaySfx(): boolean {
+  return getPreferences().sfxEnabled
+}
+
+function canPlayMusic(): boolean {
+  return getPreferences().musicEnabled
 }
 
 /**
@@ -126,18 +136,21 @@ function playBend(
 
 /** ピース移動 */
 export function soundMove() {
+  if (!canPlaySfx()) return
   // 少し高めにして軽快感を出す
   playTone(250, 0.05, 'square', 0.07)
 }
 
 /** ピース回転 */
 export function soundRotate() {
+  if (!canPlaySfx()) return
   // ピッチを上方向にベンドしてスナッピーな回転感を演出
   playBend(300, 420, 0.07, 'square', 0.1)
 }
 
 /** ピース着地 */
 export function soundLand() {
+  if (!canPlaySfx()) return
   // 低音トーン + ノイズバーストで「ドスン」感
   playTone(110, 0.12, 'square', 0.12)
   playTone(75, 0.18, 'square', 0.08, 0.03)
@@ -146,6 +159,7 @@ export function soundLand() {
 
 /** 1ライン消去 */
 export function soundClear1() {
+  if (!canPlaySfx()) return
   // 3音アルペジオで上昇する満足感のある消去音
   playTone(440, 0.10, 'square', 0.14)
   playTone(554, 0.10, 'square', 0.13, 0.07)
@@ -154,6 +168,7 @@ export function soundClear1() {
 
 /** 複数ライン or カラーマッチ消去 */
 export function soundClearMulti(count: number) {
+  if (!canPlaySfx()) return
   // 2ライン: 明るいアルペジオ
   // 3ライン: さらに速く高く
   // 4ライン(Tetris): soundTetris() 相当の派手な和音も鳴る
@@ -184,6 +199,7 @@ export function soundTetris() {
 
 /** 重力反転 */
 export function soundFlip() {
+  if (!canPlaySfx()) return
   // 低→高 ピッチベンドで「引っ張られる」感
   const notes = [165, 220, 330, 440, 660]
   notes.forEach((freq, i) => playBend(freq, freq * 1.05, 0.1, 'sawtooth', 0.11, i * 0.055))
@@ -191,18 +207,21 @@ export function soundFlip() {
 
 /** ゲームオーバー */
 export function soundGameOver() {
+  if (!canPlaySfx()) return
   const notes = [440, 370, 330, 220, 165]
   notes.forEach((freq, i) => playTone(freq, 0.2, 'sawtooth', 0.18, i * 0.15))
 }
 
 /** ハイスコア（ランクイン） */
 export function soundHighScore() {
+  if (!canPlaySfx()) return
   const notes = [523, 659, 784, 1047, 1319]
   notes.forEach((freq, i) => playTone(freq, 0.15, 'triangle', 0.2, i * 0.1))
 }
 
 /** スプリント完了 — 上昇アルペジオ→フルコード */
 export function soundSprintComplete() {
+  if (!canPlaySfx()) return
   // 上昇アルペジオ (C4→G5)
   const arpNotes = [261, 330, 392, 523, 659, 784]
   arpNotes.forEach((freq, i) =>
@@ -219,12 +238,14 @@ export function soundSprintComplete() {
 
 /** チェーン（連鎖） */
 export function soundChain(chain: number) {
+  if (!canPlaySfx()) return
   const freq = 330 * Math.pow(1.3, Math.min(chain, 5))
   playTone(freq, 0.15, 'square', 0.18)
 }
 
 /** レベルアップ */
 export function soundLevelUp() {
+  if (!canPlaySfx()) return
   [523, 659, 784, 1047].forEach((freq, i) =>
     playTone(freq, 0.12, 'triangle', 0.2, i * 0.06)
   )
@@ -232,6 +253,7 @@ export function soundLevelUp() {
 
 /** スライム着地（ぬるっとした音） */
 export function soundSlimeLand() {
+  if (!canPlaySfx()) return
   // ゆっくりピッチが落ちるベンドでぬるっと感を演出
   playBend(160, 110, 0.25, 'sine', 0.12)
   playBend(130, 90, 0.30, 'sine', 0.08, 0.08)
@@ -491,6 +513,10 @@ function scheduleBgmSequence(
 
 /** BGM を開始する。既に再生中の場合は停止してから開始する */
 export function startBGM(gameId: string) {
+  if (!canPlayMusic()) {
+    stopBGM()
+    return
+  }
   stopBGM()
 
   // colorMatch は専用パターンを使用、それ以外は従来マッピング

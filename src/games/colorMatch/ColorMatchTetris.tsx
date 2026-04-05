@@ -8,6 +8,9 @@ import TouchControls from '../../shared/TouchControls'
 import LeaderboardModal, { WeeklyTable } from '../../shared/LeaderboardModal'
 import { getWeeklyScores } from '../../shared/leaderboard'
 import { startBGM, stopBGM } from '../../shared/sound'
+import TutorialOverlay from '../../shared/TutorialOverlay'
+import { formatPersonalBest, getPersonalBest, recordPersonalBest } from '../../shared/personalBests'
+import { useTutorial } from '../../shared/useTutorial'
 
 interface Props {
   onBack: () => void
@@ -113,6 +116,7 @@ export default function ColorMatchTetris({ onBack }: Props) {
     paused,
     waiting,
     restart,
+    startIfWaiting,
     moveLeft,
     moveRight,
     rotate,
@@ -126,6 +130,9 @@ export default function ColorMatchTetris({ onBack }: Props) {
   const cellSize = useCellSize()
 
   const [showLeaderboard, setShowLeaderboard] = useState(false)
+  const [personalBest, setPersonalBest] = useState(() => getPersonalBest('colorMatch'))
+  const [bestImproved, setBestImproved] = useState(false)
+  const tutorial = useTutorial('colorMatch')
 
   useEffect(() => {
     startBGM('colorMatch')
@@ -136,13 +143,23 @@ export default function ColorMatchTetris({ onBack }: Props) {
     if (gameOver) stopBGM()
   }, [gameOver])
 
+  useEffect(() => {
+    if (!gameOver) return
+    const result = recordPersonalBest('colorMatch', score)
+    const id = setTimeout(() => {
+      setPersonalBest(result.best)
+      setBestImproved(result.improved)
+    }, 0)
+    return () => clearTimeout(id)
+  }, [gameOver, score])
+
   const boardWidth = BOARD_COLS * cellSize
   const boardHeight = BOARD_ROWS * cellSize
 
   return (
     <div className="min-h-screen bg-gray-950 flex flex-col items-center justify-start p-4 overflow-y-auto">
       {/* ヘッダー */}
-      <div className="flex items-center gap-4 mb-4">
+      <div className="flex items-center gap-3 mb-4">
         <button
           onClick={onBack}
           className="text-gray-400 hover:text-white transition-colors text-sm px-3 py-1 border border-gray-700 rounded"
@@ -152,6 +169,12 @@ export default function ColorMatchTetris({ onBack }: Props) {
         <h1 className="text-2xl font-bold text-orange-400 tracking-wider">
           Color Match Tetris
         </h1>
+        <button
+          onClick={tutorial.reopen}
+          className="rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-xs font-semibold text-white/70 transition-colors hover:bg-white/10 hover:text-white"
+        >
+          ?
+        </button>
         {!gameOver && (
           <button
             onClick={togglePause}
@@ -190,7 +213,7 @@ export default function ColorMatchTetris({ onBack }: Props) {
           {/* READY オーバーレイ */}
           {waiting && (
             <div className="absolute inset-0 flex flex-col items-center justify-center gap-3"
-              style={{ background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(2px)' }} onPointerDown={() => window.dispatchEvent(new KeyboardEvent("keydown", { key: " " }))}>
+              style={{ background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(2px)' }} onPointerDown={startIfWaiting}>
               <span className="text-5xl font-black text-orange-300 animate-pulse tracking-widest">READY</span>
               <span className="text-gray-400 text-sm">Tap to start</span>
             </div>
@@ -217,6 +240,11 @@ export default function ColorMatchTetris({ onBack }: Props) {
             <div className="absolute inset-0 bg-black/80 flex flex-col items-center justify-center gap-4 p-4">
               <p className="text-3xl font-bold game-over-text">GAME OVER</p>
               <p className="text-xl text-white">Score: {score}</p>
+              {bestImproved && (
+                <div className="rounded-full border border-orange-300/35 bg-orange-300/12 px-3 py-1 text-xs font-black tracking-[0.18em] text-orange-200 uppercase">
+                  New Personal Best
+                </div>
+              )}
               <WeeklyTable entries={getWeeklyScores('colorMatch')} />
               <button
                 onClick={restart}
@@ -256,6 +284,13 @@ export default function ColorMatchTetris({ onBack }: Props) {
               className="score-highlight text-xl font-bold tabular-nums text-yellow-400"
             >
               {score.toLocaleString()}
+            </p>
+          </div>
+
+          <div className="bg-gray-900 border border-white/10 rounded p-3 min-w-[70px]">
+            <p className="text-gray-400 text-xs uppercase tracking-wider mb-1">Best</p>
+            <p className="text-lg font-bold tabular-nums text-white">
+              {formatPersonalBest('colorMatch', personalBest)}
             </p>
           </div>
 
@@ -316,6 +351,30 @@ export default function ColorMatchTetris({ onBack }: Props) {
           onRotate={rotate}
           onHardDrop={hardDrop}
           onHold={hold}
+        />
+      )}
+
+      {tutorial.visible && (
+        <TutorialOverlay
+          accentClassName="text-orange-300"
+          title="Color Match"
+          subtitle="通常のライン消去に加えて、同じ色が4個以上つながるとまとめて消えます。連鎖で一気に伸ばすモードです。"
+          bullets={[
+            'ライン完成でも消える',
+            '同色4個以上の連結でも消える',
+            '落下後の連鎖でスコアが大きく伸びる',
+          ]}
+          controls={[
+            '← → 移動 / Space 回転',
+            '↑ ハードドロップ / ↓ ソフトドロップ',
+            'Shift ホールド / P ポーズ',
+          ]}
+          actionLabel={waiting ? '閉じて開始' : '閉じる'}
+          onAction={() => {
+            tutorial.dismiss()
+            if (waiting) startIfWaiting()
+          }}
+          onClose={tutorial.dismiss}
         />
       )}
     </div>

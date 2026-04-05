@@ -5,10 +5,22 @@
       "Bash(for f:*)",
       "Bash(do)",
       "Bash(sed -i '' 's/          onHardDrop={hardDrop}$/          onHardDrop={hardDrop}\\\\n          onHold={hold}/' \"$f\")",
-      "Bash(done)"
+      "Bash(done)",
+      "Bash(head -10 grep -n \"useSlimeTetris\\\\|const {\" /Users/keiichi/Documents/AI_Working/game/tetris/src/games/slimeBlock/SlimeTetris.tsx)",
+      "Read(//tmp/**)",
+      "Read(//private/tmp/**)",
+      "Bash(node /tmp/mobile-test.mjs)",
+      "Bash(node mobile-test.mjs)",
+      "Bash(node mobile-test2.mjs)",
+      "Bash(node mobile-test3.mjs)",
+      "Bash(node -e \":*)",
+      "Read(//Users/keiichi/Documents/AI_Working/game/tetris for f in src/**)",
+      "Bash(do echo:*)"
     ],
     "additionalDirectories": [
-      "/Users/keiichi/.claude/hooks"
+      "/Users/keiichi/.claude/hooks",
+      "/tmp",
+      "/private/tmp"
     ]
   }
 }

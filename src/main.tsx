@@ -7,11 +7,6 @@ import { unlockAudio } from './shared/sound'
 
 inject()
 
-// モバイル: パッシブでないtouchmoveでスクロールを完全防止
-document.addEventListener('touchmove', (e) => {
-  e.preventDefault()
-}, { passive: false })
-
 // モバイル: 最初のタッチでAudioContextをunlock
 document.addEventListener('pointerdown', unlockAudio, { once: true })
 

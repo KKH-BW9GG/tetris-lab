@@ -604,6 +604,12 @@ export function useColorMatchTetris() {
     setState((prev) => ({ ...prev, paused: !prev.paused }));
   }, []);
 
+  const startIfWaiting = useCallback(() => {
+    if (!waitingRef.current) return;
+    waitingRef.current = false;
+    setState((prev) => ({ ...prev, waiting: false }));
+  }, []);
+
   // ---------------------------------------------------------------
   // 描画用ボード（ゴーストピース + 現在ピースをマージ）
   // ---------------------------------------------------------------
@@ -760,6 +766,7 @@ export function useColorMatchTetris() {
     paused: state.paused,
     waiting: state.waiting,
     restart,
+    startIfWaiting,
     moveLeft,
     moveRight,
     rotate,

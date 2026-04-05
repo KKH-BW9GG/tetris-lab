@@ -360,6 +360,12 @@ export function useSlimeTetris() {
     setPaused(prev => !prev)
   }, [])
 
+  const startIfWaiting = useCallback(() => {
+    if (!waitingRef.current) return
+    waitingRef.current = false
+    setWaiting(false)
+  }, [])
+
   // ---- compute visible board (merge active piece; ghost drawn in render) ----
   const displayBoard: Board = (() => {
     if (!currentPiece) return board
@@ -458,5 +464,5 @@ export function useSlimeTetris() {
     return ghost.y === currentPiece.y ? null : ghost
   })()
 
-  return { state, ghostPiece, restart, moveLeft, moveRight, rotate, hardDrop, softDropStart, softDropEnd, togglePause, hold }
+  return { state, ghostPiece, restart, startIfWaiting, moveLeft, moveRight, rotate, hardDrop, softDropStart, softDropEnd, togglePause, hold }
 }

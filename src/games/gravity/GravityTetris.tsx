@@ -9,6 +9,9 @@ import LeaderboardModal from '../../shared/LeaderboardModal'
 import { getWeeklyScores } from '../../shared/leaderboard'
 import { WeeklyTable } from '../../shared/LeaderboardModal'
 import { startBGM, stopBGM } from '../../shared/sound'
+import TutorialOverlay from '../../shared/TutorialOverlay'
+import { formatPersonalBest, getPersonalBest, recordPersonalBest } from '../../shared/personalBests'
+import { useTutorial } from '../../shared/useTutorial'
 
 interface Props {
   onBack: () => void
@@ -189,10 +192,13 @@ function HoldPiecePreview({ piece }: { piece: Piece }) {
 }
 
 export default function GravityTetris({ onBack }: Props) {
-  const { state, ghostPiece, start, moveLeft, moveRight, rotate, hardDrop, softDropStart, softDropEnd, togglePause, hold } = useGravityTetris()
+  const { state, ghostPiece, start, startIfWaiting, moveLeft, moveRight, rotate, hardDrop, softDropStart, softDropEnd, togglePause, hold } = useGravityTetris()
   useDAS(moveLeft, moveRight)
   const cellSize = useCellSize()
   const [showLeaderboard, setShowLeaderboard] = useState(false)
+  const [personalBest, setPersonalBest] = useState(() => getPersonalBest('gravity'))
+  const [bestImproved, setBestImproved] = useState(false)
+  const tutorial = useTutorial('gravity')
 
   useEffect(() => {
     startBGM('gravity')
@@ -203,11 +209,21 @@ export default function GravityTetris({ onBack }: Props) {
     if (state.gameOver) stopBGM()
   }, [state.gameOver])
 
+  useEffect(() => {
+    if (!state.gameOver) return
+    const result = recordPersonalBest('gravity', state.score)
+    const id = setTimeout(() => {
+      setPersonalBest(result.best)
+      setBestImproved(result.improved)
+    }, 0)
+    return () => clearTimeout(id)
+  }, [state.gameOver, state.score])
+
   const flipLabel = state.gravity === 'down' ? '↓ 通常重力' : '↑ 反転重力'
 
   return (
     <div className="min-h-screen bg-gray-950 text-white flex flex-col items-center justify-start gap-2 py-4 overflow-y-auto">
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-3">
         <button
           onClick={onBack}
           className="px-3 py-1 rounded bg-gray-700 hover:bg-gray-600 text-sm transition-colors"
@@ -215,6 +231,12 @@ export default function GravityTetris({ onBack }: Props) {
           ← 戻る
         </button>
         <h1 className="text-2xl font-bold text-indigo-400">重力反転テトリス</h1>
+        <button
+          onClick={tutorial.reopen}
+          className="rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-xs font-semibold text-white/70 transition-colors hover:bg-white/10 hover:text-white"
+        >
+          ?
+        </button>
         {!state.gameOver && (
           <button
             onClick={togglePause}
@@ -260,7 +282,7 @@ export default function GravityTetris({ onBack }: Props) {
           {/* READY overlay */}
           {state.waiting && (
             <div className="absolute inset-0 flex flex-col items-center justify-center gap-3"
-              style={{ background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(2px)' }} onPointerDown={() => window.dispatchEvent(new KeyboardEvent("keydown", { key: " " }))}>
+              style={{ background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(2px)' }} onPointerDown={startIfWaiting}>
               <span className="text-5xl font-black text-indigo-300 animate-pulse tracking-widest">READY</span>
               <span className="text-gray-400 text-sm">Tap to start</span>
             </div>
@@ -356,6 +378,13 @@ export default function GravityTetris({ onBack }: Props) {
             </div>
           </div>
 
+          <div className="bg-gray-900 rounded-lg p-1.5 border border-white/10 text-center min-w-[70px]">
+            <div className="text-xs text-gray-400 mb-1">BEST</div>
+            <div className="text-base font-black tabular-nums text-white">
+              {formatPersonalBest('gravity', personalBest)}
+            </div>
+          </div>
+
           <div className="bg-gray-900 rounded-lg p-1.5 border border-gray-700 text-xs text-gray-400 space-y-1 hidden lg:block min-w-[120px]">
             <div className="font-semibold text-gray-300 mb-1">操作</div>
             <div>← → 移動</div>
@@ -402,6 +431,11 @@ export default function GravityTetris({ onBack }: Props) {
               スコア: <span className="text-yellow-400 font-bold">{state.score.toLocaleString()}</span>
             </div>
             <div className="text-sm text-gray-400">ライン: {state.lines} / レベル: {state.level}</div>
+            {bestImproved && (
+              <div className="rounded-full border border-indigo-300/35 bg-indigo-300/12 px-3 py-1 text-xs font-black tracking-[0.18em] text-indigo-200 uppercase">
+                New Personal Best
+              </div>
+            )}
             <WeeklyTable entries={getWeeklyScores('gravity')} />
             <button
               onClick={start}
@@ -417,6 +451,30 @@ export default function GravityTetris({ onBack }: Props) {
             </button>
           </div>
         </div>
+      )}
+
+      {tutorial.visible && (
+        <TutorialOverlay
+          accentClassName="text-indigo-300"
+          title="Gravity Flip"
+          subtitle="上下の重力が一定時間ごとに入れ替わります。どちら向きでも次ピースが置ける余白を残すのが大事です。"
+          bullets={[
+            '30秒ごとに重力が反転',
+            '反転後のスポーン位置も上下で変化',
+            '片側に積みすぎると次の反転で詰みやすい',
+          ]}
+          controls={[
+            '← → 移動 / Space 回転',
+            '↑ ハードドロップ / ↓ ソフトドロップ',
+            'Shift ホールド / P ポーズ',
+          ]}
+          actionLabel={state.waiting ? '閉じて開始' : '閉じる'}
+          onAction={() => {
+            tutorial.dismiss()
+            if (state.waiting) startIfWaiting()
+          }}
+          onClose={tutorial.dismiss}
+        />
       )}
     </div>
   )

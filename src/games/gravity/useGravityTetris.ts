@@ -563,6 +563,12 @@ export function useGravityTetris() {
     setState((prev) => ({ ...prev, paused: !prev.paused }));
   }, []);
 
+  const startIfWaiting = useCallback(() => {
+    if (!waitingRef.current) return;
+    waitingRef.current = false;
+    setState((prev) => ({ ...prev, waiting: false }));
+  }, []);
+
   // -------------------------------------------------------
   // タッチ操作用アクション
   // -------------------------------------------------------
@@ -671,6 +677,7 @@ export function useGravityTetris() {
     state,
     ghostPiece,
     start,
+    startIfWaiting,
     moveLeft,
     moveRight,
     rotate,

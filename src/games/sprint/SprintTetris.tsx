@@ -8,6 +8,9 @@ import TouchControls from '../../shared/TouchControls'
 import LeaderboardModal from '../../shared/LeaderboardModal'
 import { isTopTime } from '../../shared/leaderboard'
 import { startBGM, stopBGM } from '../../shared/sound'
+import TutorialOverlay from '../../shared/TutorialOverlay'
+import { formatPersonalBest, getPersonalBest, recordPersonalBest } from '../../shared/personalBests'
+import { useTutorial } from '../../shared/useTutorial'
 
 interface Props {
   onBack: () => void
@@ -218,13 +221,16 @@ function ProgressBar({ lines }: { lines: number }) {
 // SprintTetris
 // -------------------------------------------------------
 export default function SprintTetris({ onBack }: Props) {
-  const { state, getGhostPiece, start, moveLeft, moveRight, rotate, hardDrop, hold, softDropStart, softDropEnd, togglePause } =
+  const { state, getGhostPiece, start, startIfWaiting, moveLeft, moveRight, rotate, hardDrop, hold, softDropStart, softDropEnd, togglePause } =
     useSprintTetris()
   useDAS(moveLeft, moveRight)
   const cellSize = useCellSize()
 
   const [showLeaderboard, setShowLeaderboard] = useState(false)
   const [leaderboardShown, setLeaderboardShown] = useState(false)
+  const [personalBest, setPersonalBest] = useState(() => getPersonalBest('sprint'))
+  const [bestImproved, setBestImproved] = useState(false)
+  const tutorial = useTutorial('sprint')
 
   useEffect(() => {
     startBGM('sprint')
@@ -240,6 +246,9 @@ export default function SprintTetris({ onBack }: Props) {
   useEffect(() => {
     if (!state.finished || leaderboardShown) return
     const id = setTimeout(() => {
+      const result = recordPersonalBest('sprint', state.elapsedMs, true)
+      setPersonalBest(result.best)
+      setBestImproved(result.improved)
       if (isTopTime('sprint', state.elapsedMs)) {
         setShowLeaderboard(true)
       }
@@ -251,13 +260,14 @@ export default function SprintTetris({ onBack }: Props) {
   const handleRestart = () => {
     setShowLeaderboard(false)
     setLeaderboardShown(false)
+    setBestImproved(false)
     start()
   }
 
   return (
     <div className="min-h-screen bg-gray-950 text-white flex flex-col items-center justify-start gap-2 py-4 overflow-y-auto">
       {/* ヘッダー */}
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-3">
         <button
           onClick={onBack}
           className="px-3 py-1 rounded bg-gray-700 hover:bg-gray-600 text-sm transition-colors"
@@ -265,6 +275,12 @@ export default function SprintTetris({ onBack }: Props) {
           ← 戻る
         </button>
         <h1 className="text-2xl font-bold text-cyan-400">スプリントテトリス - 40 Lines</h1>
+        <button
+          onClick={tutorial.reopen}
+          className="rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-xs font-semibold text-white/70 transition-colors hover:bg-white/10 hover:text-white"
+        >
+          ?
+        </button>
         {!state.gameOver && !state.finished && !state.waiting && (
           <button
             onClick={togglePause}
@@ -299,7 +315,7 @@ export default function SprintTetris({ onBack }: Props) {
 
           {/* READY オーバーレイ（キー入力待ち） */}
           {state.waiting && (
-            <div className="absolute inset-0 bg-black/60 flex flex-col items-center justify-center gap-2 rounded" onPointerDown={() => window.dispatchEvent(new KeyboardEvent('keydown', { key: ' ' }))}>
+            <div className="absolute inset-0 bg-black/60 flex flex-col items-center justify-center gap-2 rounded" onPointerDown={startIfWaiting}>
               <div className="text-4xl font-black text-cyan-300 animate-pulse">READY</div>
               <div className="text-sm text-gray-400">Tap to start</div>
             </div>
@@ -319,6 +335,11 @@ export default function SprintTetris({ onBack }: Props) {
                 {formatElapsed(state.elapsedMs)}
               </div>
               <div className="text-xs text-cyan-400 tracking-widest uppercase">40 Lines Complete</div>
+              {bestImproved && (
+                <div className="rounded-full border border-cyan-300/40 bg-cyan-300/15 px-3 py-1 text-xs font-black tracking-[0.18em] text-cyan-200 uppercase">
+                  New Personal Best
+                </div>
+              )}
             </div>
           )}
 
@@ -353,6 +374,13 @@ export default function SprintTetris({ onBack }: Props) {
             <div className="text-xs text-gray-400 mb-1">タイム</div>
             <div className="text-4xl font-black tabular-nums text-cyan-300 leading-tight">
               {formatElapsed(state.elapsedMs)}
+            </div>
+          </div>
+
+          <div className="bg-gray-900 rounded-lg p-1.5 border border-white/10 text-center min-w-[70px]">
+            <div className="text-xs text-gray-400 mb-1">BEST</div>
+            <div className="text-base font-black tabular-nums text-white">
+              {formatPersonalBest('sprint', personalBest)}
             </div>
           </div>
 
@@ -444,6 +472,30 @@ export default function SprintTetris({ onBack }: Props) {
           score={state.elapsedMs}
           isTime={true}
           onClose={() => setShowLeaderboard(false)}
+        />
+      )}
+
+      {tutorial.visible && (
+        <TutorialOverlay
+          accentClassName="text-cyan-300"
+          title="Sprint Tetris"
+          subtitle="40ラインを最短時間で消すモードです。焦るより、盤面を低く保ってミスを減らすほうが速くなります。"
+          bullets={[
+            '40ライン消去でクリア',
+            'タイマーは最初の操作で開始',
+            'ホールドで平らな地形を維持',
+          ]}
+          controls={[
+            '← → 移動 / Space 回転',
+            '↑ ハードドロップ / ↓ ソフトドロップ',
+            'Shift ホールド / P ポーズ',
+          ]}
+          actionLabel={state.waiting ? '閉じて開始' : '閉じる'}
+          onAction={() => {
+            tutorial.dismiss()
+            if (state.waiting) startIfWaiting()
+          }}
+          onClose={tutorial.dismiss}
         />
       )}
     </div>
